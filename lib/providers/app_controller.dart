@@ -2,7 +2,8 @@ import 'dart:convert';
 import 'dart:math';
 
 import 'package:crypto/crypto.dart';
-import 'package:cryptography/cryptography.dart';
+import 'package:cryptography/cryptography.dart' as cryptography;
+import 'package:flutter_local_notifications/flutter_local_notifications.dart' show DateTimeComponents;
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -533,11 +534,11 @@ class AppController extends ChangeNotifier {
   Future<void> setPin(String pin) async {
     const iterations = 120000;
     final salt = List<int>.generate(16, (_) => Random.secure().nextInt(256));
-    final key = await Pbkdf2(
-      macAlgorithm: Hmac.sha256(),
+    final key = await cryptography.Pbkdf2(
+      macAlgorithm: cryptography.Hmac.sha256(),
       iterations: iterations,
       bits: 256,
-    ).deriveKey(secretKey: SecretKey(utf8.encode(pin)), nonce: salt);
+    ).deriveKey(secretKey: cryptography.SecretKey(utf8.encode(pin)), nonce: salt);
     _pinSalt = base64Encode(salt);
     _pinHash = base64Encode(await key.extractBytes());
     _pinIterations = iterations;
@@ -557,12 +558,12 @@ class AppController extends ChangeNotifier {
       return true;
     }
     try {
-      final key = await Pbkdf2(
-        macAlgorithm: Hmac.sha256(),
+      final key = await cryptography.Pbkdf2(
+        macAlgorithm: cryptography.Hmac.sha256(),
         iterations: _pinIterations,
         bits: 256,
       ).deriveKey(
-        secretKey: SecretKey(utf8.encode(pin)),
+        secretKey: cryptography.SecretKey(utf8.encode(pin)),
         nonce: base64Decode(_pinSalt),
       );
       final candidate = await key.extractBytes();
@@ -591,13 +592,13 @@ class AppController extends ChangeNotifier {
   Future<String> exportEncryptedBackup(String passphrase) async {
     const iterations = 150000;
     final salt = List<int>.generate(16, (_) => Random.secure().nextInt(256));
-    final algorithm = AesGcm.with256bits();
-    final key = await Pbkdf2(
-      macAlgorithm: Hmac.sha256(),
+    final algorithm = cryptography.AesGcm.with256bits();
+    final key = await cryptography.Pbkdf2(
+      macAlgorithm: cryptography.Hmac.sha256(),
       iterations: iterations,
       bits: 256,
     ).deriveKey(
-      secretKey: SecretKey(utf8.encode(passphrase)),
+      secretKey: cryptography.SecretKey(utf8.encode(passphrase)),
       nonce: salt,
     );
     final encrypted = await algorithm.encrypt(
@@ -637,16 +638,16 @@ class AppController extends ChangeNotifier {
     final nonce = base64Decode(envelope['nonce'] as String);
     final cipherText = base64Decode(envelope['cipherText'] as String);
     final mac = base64Decode(envelope['mac'] as String);
-    final key = await Pbkdf2(
-      macAlgorithm: Hmac.sha256(),
+    final key = await cryptography.Pbkdf2(
+      macAlgorithm: cryptography.Hmac.sha256(),
       iterations: iterations,
       bits: 256,
     ).deriveKey(
-      secretKey: SecretKey(utf8.encode(passphrase)),
+      secretKey: cryptography.SecretKey(utf8.encode(passphrase)),
       nonce: salt,
     );
-    final clearText = await AesGcm.with256bits().decrypt(
-      SecretBox(cipherText, nonce: nonce, mac: Mac(mac)),
+    final clearText = await cryptography.AesGcm.with256bits().decrypt(
+      cryptography.SecretBox(cipherText, nonce: nonce, mac: cryptography.Mac(mac)),
       secretKey: key,
     );
     await importBackup(utf8.decode(clearText));
