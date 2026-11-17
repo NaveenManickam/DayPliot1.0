@@ -153,7 +153,7 @@ class _RecordEditorSheetState extends State<RecordEditorSheet> {
                         const SizedBox(height: 14),
                       ],
                       if (_type == RecordType.water) ...[
-                        Text('Water intake', style: Theme.of(context).textTheme.titleMedium),
+                        Text(_tr('Water intake'), style: Theme.of(context).textTheme.titleMedium),
                         const SizedBox(height: 12),
                         _numberStepper('Amount (ml)', _ml, 50, 1500, (v) => setState(() => _ml = v)),
                         const SizedBox(height: 12),
@@ -227,7 +227,7 @@ class _RecordEditorSheetState extends State<RecordEditorSheet> {
                             final day = index + 1;
                             final labels = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
                             return FilterChip(
-                              label: Text(labels[index]),
+                              label: Text(widget.controller.language == 'Tamil' ? ['தி', 'செ', 'பு', 'வி', 'வெ', 'ச', 'ஞா'][index] : labels[index]),
                               selected: _weekdays.contains(day),
                               onSelected: (selected) => setState(() {
                                 if (selected) { _weekdays.add(day); } else { _weekdays.remove(day); }
