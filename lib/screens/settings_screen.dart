@@ -116,8 +116,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final result = await showDialog<String>(context: context, builder: (context) => AlertDialog(
       title: Text(widget.controller.hasPin ? 'Change app PIN' : 'Set app PIN'),
       content: Column(mainAxisSize: MainAxisSize.min, children: [
-        TextField(controller: first, keyboardType: TextInputType.number, obscureText: true, maxLength: 8, decoration: const InputDecoration(labelText: 'New PIN (4–8 digits)')),
-        TextField(controller: second, keyboardType: TextInputType.number, obscureText: true, maxLength: 8, decoration: const InputDecoration(labelText: 'Confirm PIN')),
+        TextField(controller: first, keyboardType: TextInputType.number, obscureText: true, maxLength: 8, decoration: const InputDecoration(labelText: context.dp('New PIN (4–8 digits)'))),
+        TextField(controller: second, keyboardType: TextInputType.number, obscureText: true, maxLength: 8, decoration: const InputDecoration(labelText: context.dp('Confirm PIN'))),
       ]),
       actions: [TextButton(onPressed: () => Navigator.pop(context), child: Text(context.dp('Cancel'))), FilledButton(onPressed: () {
         if (first.text.length < 4 || first.text.length > 8 || first.text != second.text || int.tryParse(first.text) == null) return;
@@ -157,18 +157,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
       builder: (context) => AlertDialog(
         title: Text(context.dp('Protect your backup')),
         content: Column(mainAxisSize: MainAxisSize.min, children: [
-          const Text('Choose a password of at least 8 characters. You will need it to restore this backup.', style: TextStyle(fontSize: 12)),
+          Text(context.dp('Choose a password of at least 8 characters. You will need it to restore this backup.'), style: TextStyle(fontSize: 12)),
           const SizedBox(height: 12),
-          TextField(controller: passphrase, obscureText: true, decoration: const InputDecoration(labelText: 'Backup password')),
+          TextField(controller: passphrase, obscureText: true, decoration: const InputDecoration(labelText: context.dp('Backup password'))),
           const SizedBox(height: 8),
-          TextField(controller: confirmPassphrase, obscureText: true, decoration: const InputDecoration(labelText: 'Confirm password')),
+          TextField(controller: confirmPassphrase, obscureText: true, decoration: const InputDecoration(labelText: context.dp('Confirm password'))),
         ]),
         actions: [
           TextButton(onPressed: () => Navigator.pop(context), child: Text(context.dp('Cancel'))),
           FilledButton(onPressed: () {
             if (passphrase.text.length < 8 || passphrase.text != confirmPassphrase.text) return;
             Navigator.pop(context, passphrase.text);
-          }, child: const Text('Encrypt backup')),
+          }, child: Text(context.dp('Encrypt backup'))),
         ],
       ),
     );
@@ -197,14 +197,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
         content: SizedBox(
           width: double.maxFinite,
           child: Column(mainAxisSize: MainAxisSize.min, children: [
-            TextField(controller: source, minLines: 5, maxLines: 8, decoration: const InputDecoration(hintText: 'Paste your DayPilot backup JSON here'), style: const TextStyle(fontSize: 11)),
+            TextField(controller: source, minLines: 5, maxLines: 8, decoration: const InputDecoration(hintText: context.dp('Paste your DayPilot backup JSON here')), style: const TextStyle(fontSize: 11)),
             const SizedBox(height: 10),
-            TextField(controller: passphrase, obscureText: true, decoration: const InputDecoration(labelText: 'Backup password (encrypted backups)')),
+            TextField(controller: passphrase, obscureText: true, decoration: const InputDecoration(labelText: context.dp('Backup password (encrypted backups)'))),
           ]),
         ),
         actions: [
           TextButton(onPressed: () => Navigator.pop(context, false), child: Text(context.dp('Cancel'))),
-          FilledButton(onPressed: () => Navigator.pop(context, true), child: const Text('Restore')),
+          FilledButton(onPressed: () => Navigator.pop(context, true), child: Text(context.dp('Restore'))),
         ],
       ),
     );
