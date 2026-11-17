@@ -117,7 +117,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       title: Text(context.dp(widget.controller.hasPin ? 'Change app PIN' : 'Set app PIN')),
       content: Column(mainAxisSize: MainAxisSize.min, children: [
         TextField(controller: first, keyboardType: TextInputType.number, obscureText: true, maxLength: 8, decoration: InputDecoration(labelText: context.dp('New PIN (4–8 digits)'))),
-        TextField(controller: second, keyboardType: TextInputType.number, obscureText: true, maxLength: 8, decoration: const InputDecoration(labelText: context.dp('Confirm PIN'))),
+        TextField(controller: second, keyboardType: TextInputType.number, obscureText: true, maxLength: 8, decoration: InputDecoration(labelText: context.dp('Confirm PIN'))),
       ]),
       actions: [TextButton(onPressed: () => Navigator.pop(context), child: Text(context.dp('Cancel'))), FilledButton(onPressed: () {
         if (first.text.length < 4 || first.text.length > 8 || first.text != second.text || int.tryParse(first.text) == null) return;
@@ -159,9 +159,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
         content: Column(mainAxisSize: MainAxisSize.min, children: [
           Text(context.dp('Choose a password of at least 8 characters. You will need it to restore this backup.'), style: TextStyle(fontSize: 12)),
           const SizedBox(height: 12),
-          TextField(controller: passphrase, obscureText: true, decoration: const InputDecoration(labelText: context.dp('Backup password'))),
+          TextField(controller: passphrase, obscureText: true, decoration: InputDecoration(labelText: context.dp('Backup password'))),
           const SizedBox(height: 8),
-          TextField(controller: confirmPassphrase, obscureText: true, decoration: const InputDecoration(labelText: context.dp('Confirm password'))),
+          TextField(controller: confirmPassphrase, obscureText: true, decoration: InputDecoration(labelText: context.dp('Confirm password'))),
         ]),
         actions: [
           TextButton(onPressed: () => Navigator.pop(context), child: Text(context.dp('Cancel'))),
@@ -199,7 +199,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           child: Column(mainAxisSize: MainAxisSize.min, children: [
             TextField(controller: source, minLines: 5, maxLines: 8, decoration: InputDecoration(hintText: context.dp('Paste your DayPilot backup JSON here')), style: const TextStyle(fontSize: 11)),
             const SizedBox(height: 10),
-            TextField(controller: passphrase, obscureText: true, decoration: const InputDecoration(labelText: context.dp('Backup password (encrypted backups)'))),
+            TextField(controller: passphrase, obscureText: true, decoration: InputDecoration(labelText: context.dp('Backup password (encrypted backups)'))),
           ]),
         ),
         actions: [
