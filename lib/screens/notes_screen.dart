@@ -53,7 +53,7 @@ class _NotesScreenState extends State<NotesScreen> {
         ),
         const SizedBox(height: 17),
         Row(children: [
-          Expanded(child: Text('${notes.length} notes', style: const TextStyle(color: AppColors.muted, fontSize: 11, fontWeight: FontWeight.w700))),
+          Expanded(child: Text(widget.controller.language == 'Tamil' ? '${notes.length} குறிப்புகள்' : '${notes.length} notes', style: const TextStyle(color: AppColors.muted, fontSize: 11, fontWeight: FontWeight.w700))),
           Text(context.dp('Stored on this device'), style: TextStyle(color: AppColors.muted, fontSize: 10)),
         ]),
         const SizedBox(height: 10),
@@ -117,7 +117,7 @@ class _NoteCard extends StatelessWidget {
                 const SizedBox(height: 5),
                 Text(note.body.isEmpty ? context.dp('No additional text') : note.body, maxLines: 3, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 11, color: AppColors.muted, height: 1.4)),
                 const SizedBox(height: 9),
-                Text('Updated ${DateFormat('d MMM, h:mm a').format(note.updatedAt)}', style: const TextStyle(fontSize: 9, color: AppColors.muted, fontWeight: FontWeight.w600)),
+                Text('${context.dp('Updated')} ${DateFormat('d MMM, h:mm a').format(note.updatedAt)}', style: const TextStyle(fontSize: 9, color: AppColors.muted, fontWeight: FontWeight.w600)),
               ])),
               PopupMenuButton<String>(
                 onSelected: (value) { if (value == 'delete') onDelete(); if (value == 'edit') onTap(); },
