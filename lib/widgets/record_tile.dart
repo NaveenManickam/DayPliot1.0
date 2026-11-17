@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../core/app_constants.dart';
 import '../models/app_record.dart';
 import '../utils/date_helpers.dart';
+import '../utils/app_strings.dart';
 
 class RecordTile extends StatelessWidget {
   const RecordTile({super.key, required this.record, this.onTap, this.onToggle, this.compact = false});
@@ -72,8 +73,8 @@ class RecordTile extends StatelessWidget {
                   const SizedBox(height: 9),
                   Row(children: [
                     if (record.meta['priority'] != null)
-                      _tinyPill('${record.meta['priority']} priority'),
-                    if (record.meta['category'] != null) _tinyPill('${record.meta['category']}'),
+                      _tinyPill(context.dp('${record.meta['priority']} priority')),
+                    if (record.meta['category'] != null) _tinyPill(context.dp('${record.meta['category']}')),
                     const Spacer(),
                     if (isCheckable && record.done)
                       const Icon(Icons.check_circle_rounded, color: Colors.white, size: 16),
