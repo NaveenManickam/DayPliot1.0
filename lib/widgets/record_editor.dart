@@ -164,7 +164,7 @@ class _RecordEditorSheetState extends State<RecordEditorSheet> {
                       if (_type == RecordType.task) ...[
                         DropdownButtonFormField<String>(
                           value: _priority,
-                          decoration: const InputDecoration(labelText: 'Priority'),
+                          decoration: InputDecoration(labelText: _tr('Priority')),
                           items: ['High', 'Medium', 'Low'].map((v) => DropdownMenuItem(value: v, child: Text(_tr(v)))).toList(),
                           onChanged: (v) => setState(() => _priority = v ?? 'Medium'),
                         ),
@@ -175,7 +175,7 @@ class _RecordEditorSheetState extends State<RecordEditorSheet> {
                       if (_type == RecordType.habit) ...[
                         DropdownButtonFormField<String>(
                           value: _frequency,
-                          decoration: const InputDecoration(labelText: 'Frequency'),
+                          decoration: InputDecoration(labelText: _tr('Frequency')),
                           items: ['Daily', 'Weekly', 'Custom'].map((v) => DropdownMenuItem(value: v, child: Text(_tr(v)))).toList(),
                           onChanged: (v) => setState(() {
                             _frequency = v ?? 'Daily';
@@ -189,8 +189,8 @@ class _RecordEditorSheetState extends State<RecordEditorSheet> {
                         ),
                         DropdownButtonFormField<String>(
                           value: _habitIcon,
-                          decoration: const InputDecoration(labelText: 'Habit icon'),
-                          items: const [
+                          decoration: InputDecoration(labelText: _tr('Habit icon')),
+                          items: [
                             DropdownMenuItem(value: 'fire', child: Text('🔥 ${_tr('Focus / routine')}')),
                             DropdownMenuItem(value: 'water', child: Text('💧 ${_tr('Water')}')),
                             DropdownMenuItem(value: 'run', child: Text('🏃 ${_tr('Exercise')}')),
@@ -243,7 +243,7 @@ class _RecordEditorSheetState extends State<RecordEditorSheet> {
                       if (_type == RecordType.event) ...[
                         DropdownButtonFormField<String>(
                           value: _category,
-                          decoration: const InputDecoration(labelText: 'Category'),
+                          decoration: InputDecoration(labelText: _tr('Category')),
                           items: ['Personal', 'Work', 'Health', 'Family', 'Other'].map((v) => DropdownMenuItem(value: v, child: Text(_tr(v)))).toList(),
                           onChanged: (v) => setState(() => _category = v ?? 'Personal'),
                         ),
@@ -253,8 +253,8 @@ class _RecordEditorSheetState extends State<RecordEditorSheet> {
                         _timeRow('Ends', _endAt, () => _pickTime(start: false)),
                         DropdownButtonFormField<String>(
                           value: _recurrence,
-                          decoration: const InputDecoration(labelText: 'Repeat'),
-                          items: const [
+                          decoration: InputDecoration(labelText: _tr('Repeat')),
+                          items: [
                             DropdownMenuItem(value: 'none', child: Text(_tr('Does not repeat'))),
                             DropdownMenuItem(value: 'daily', child: Text(_tr('Daily'))),
                             DropdownMenuItem(value: 'weekly', child: Text(_tr('Weekly'))),
@@ -287,7 +287,7 @@ class _RecordEditorSheetState extends State<RecordEditorSheet> {
                           textCapitalization: TextCapitalization.sentences,
                           minLines: 2,
                           maxLines: 4,
-                          decoration: const InputDecoration(labelText: 'Description (optional)', alignLabelWithHint: true),
+                          decoration: InputDecoration(labelText: _tr('Description (optional)'), alignLabelWithHint: true),
                         ),
                       ],
                       if (_type == RecordType.exercise) ...[
@@ -299,7 +299,7 @@ class _RecordEditorSheetState extends State<RecordEditorSheet> {
                       if (_supportsReminder) ...[
                         SwitchListTile.adaptive(
                           contentPadding: EdgeInsets.zero,
-                          title: const Text('Set a reminder', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),
+                          title: Text(_tr('Set a reminder'), style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),
                           value: _reminderEnabled,
                           onChanged: (value) => setState(() {
                             _reminderEnabled = value;
