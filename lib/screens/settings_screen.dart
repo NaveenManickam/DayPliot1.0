@@ -93,7 +93,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ]),
           _GroupTitle(context.dp('About')),
           _SettingsCard(children: [
-            ListTile(leading: const _IconBox(icon: Icons.sailing_rounded, color: AppColors.blue, pale: AppColors.bluePale), title: Text(context.dp('DayPilot'), style: TextStyle(fontWeight: FontWeight.w800)), subtitle: Text(context.dp('Version 1.0.0 · Offline-first personal planner'), style: TextStyle(fontSize: 10))),
+            ListTile(leading: const _IconBox(icon: Icons.sailing_rounded, color: AppColors.blue, pale: AppColors.bluePale), title: Text(context.dp('DayPilot'), style: TextStyle(fontWeight: FontWeight.w800)), subtitle: Text(context.dp('Version 1.0.1 · Offline-first personal planner'), style: TextStyle(fontSize: 10))),
             Padding(padding: const EdgeInsets.fromLTRB(16, 0, 16, 14), child: Text(context.dp('Your personal data stays on this device unless you explicitly export a backup.'), style: TextStyle(fontSize: 10, color: AppColors.muted, height: 1.4))),
           ]),
           if (_working) const Padding(padding: EdgeInsets.all(16), child: Center(child: CircularProgressIndicator())),

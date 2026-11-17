@@ -177,6 +177,7 @@ class AppStrings {
     'Good Afternoon': 'மதிய வணக்கம்',
     'Good Evening': 'மாலை வணக்கம்',
     'Good Night': 'இரவு வணக்கம்',
+    'Version 1.0.1 · Offline-first personal planner': 'பதிப்பு 1.0.1 · இணையமின்றி இயங்கும் தனிப்பட்ட திட்டமிடி',
   };
 }
 

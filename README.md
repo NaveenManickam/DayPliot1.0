@@ -8,7 +8,7 @@ DayPilot is a Flutter/Dart Android planner with a soft-white rounded-card interf
 - Application ID: `com.naveenmanickam.daypilot`
 - Flutter package: `daypilot`
 - Android minimum SDK: 24
-- Current source version: `1.0.0+1`
+- Current source version: `1.0.1+2`
 
 ## App modules
 
