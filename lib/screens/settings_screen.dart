@@ -114,9 +114,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final first = TextEditingController();
     final second = TextEditingController();
     final result = await showDialog<String>(context: context, builder: (context) => AlertDialog(
-      title: Text(widget.controller.hasPin ? 'Change app PIN' : 'Set app PIN'),
+      title: Text(context.dp(widget.controller.hasPin ? 'Change app PIN' : 'Set app PIN')),
       content: Column(mainAxisSize: MainAxisSize.min, children: [
-        TextField(controller: first, keyboardType: TextInputType.number, obscureText: true, maxLength: 8, decoration: const InputDecoration(labelText: context.dp('New PIN (4–8 digits)'))),
+        TextField(controller: first, keyboardType: TextInputType.number, obscureText: true, maxLength: 8, decoration: InputDecoration(labelText: context.dp('New PIN (4–8 digits)'))),
         TextField(controller: second, keyboardType: TextInputType.number, obscureText: true, maxLength: 8, decoration: const InputDecoration(labelText: context.dp('Confirm PIN'))),
       ]),
       actions: [TextButton(onPressed: () => Navigator.pop(context), child: Text(context.dp('Cancel'))), FilledButton(onPressed: () {
@@ -197,7 +197,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         content: SizedBox(
           width: double.maxFinite,
           child: Column(mainAxisSize: MainAxisSize.min, children: [
-            TextField(controller: source, minLines: 5, maxLines: 8, decoration: const InputDecoration(hintText: context.dp('Paste your DayPilot backup JSON here')), style: const TextStyle(fontSize: 11)),
+            TextField(controller: source, minLines: 5, maxLines: 8, decoration: InputDecoration(hintText: context.dp('Paste your DayPilot backup JSON here')), style: const TextStyle(fontSize: 11)),
             const SizedBox(height: 10),
             TextField(controller: passphrase, obscureText: true, decoration: const InputDecoration(labelText: context.dp('Backup password (encrypted backups)'))),
           ]),
