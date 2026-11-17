@@ -129,6 +129,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
           sleepRecords: sleepRecords,
           moodRecords: moodRecords,
           today: now,
+          period: _period,
         ),
         const SizedBox(height: 18),
         Text(context.dp('Sleep & mood history'), style: Theme.of(context).textTheme.titleLarge),
@@ -377,75 +378,69 @@ class _Heatmap extends StatelessWidget {
     );
   }
 }
+class _TrendBucket {
+  const _TrendBucket({required this.start, required this.end, required this.label});
+  final DateTime start;
+  final DateTime end;
+  final String label;
+}
+
 class _WellnessTrends extends StatelessWidget {
   const _WellnessTrends({
     required this.sleepRecords,
     required this.moodRecords,
     required this.today,
+    required this.period,
   });
 
   final List<AppRecord> sleepRecords;
   final List<AppRecord> moodRecords;
   final DateTime today;
+  final String period;
 
   @override
   Widget build(BuildContext context) {
     final validSleep = sleepRecords.where((r) => r.startAt != null && r.endAt != null).toList();
-    final sleepHours = <double>[];
-    final moodScores = <double>[];
     final moodValues = moodRecords
         .map((r) => _moodScore(r.meta['mood'] as String? ?? r.title))
         .whereType<int>()
         .toList();
-    for (var offset = 6; offset >= 0; offset--) {
-      final day = today.subtract(Duration(days: offset));
-      final nights = validSleep.where((r) =>
-          r.date.year == day.year && r.date.month == day.month && r.date.day == day.day);
-      final durations = nights.map((r) {
-        var duration = r.endAt!.difference(r.startAt!);
-        if (duration.isNegative) duration += const Duration(days: 1);
-        return duration.inMinutes / 60;
-      }).toList();
-      sleepHours.add(durations.isEmpty
-          ? 0
-          : durations.reduce((a, b) => a + b) / durations.length);
+    final buckets = _buildBuckets();
+    final sleepHours = <double>[];
+    final moodScores = <double>[];
 
-      final dayMoods = moodRecords.where((r) =>
-          r.date.year == day.year && r.date.month == day.month && r.date.day == day.day);
-      final scores = dayMoods
+    for (final bucket in buckets) {
+      final nights = validSleep.where((r) => _inRange(r.date, bucket.start, bucket.end));
+      sleepHours.add(_average(nights.map(_sleepHours).toList()));
+      final scores = moodRecords
+          .where((r) => _inRange(r.date, bucket.start, bucket.end))
           .map((r) => _moodScore(r.meta['mood'] as String? ?? r.title))
           .whereType<int>()
           .toList();
-      moodScores.add(scores.isEmpty
-          ? 0
-          : scores.reduce((a, b) => a + b) / scores.length);
+      moodScores.add(_average(scores));
     }
-    final averageSleep = validSleep.isEmpty
-        ? 0.0
-        : validSleep.map((r) {
-            var duration = r.endAt!.difference(r.startAt!);
-            if (duration.isNegative) duration += const Duration(days: 1);
-            return duration.inMinutes / 60;
-          }).reduce((a, b) => a + b) / validSleep.length;
-    final averageMood = moodValues.isEmpty
-        ? 0.0
-        : moodValues.reduce((a, b) => a + b) / moodValues.length;
+
+    final averageSleep = _average(validSleep.map(_sleepHours).toList());
+    final averageMood = _average(moodValues);
+    final labels = buckets.map((bucket) => bucket.label).toList();
 
     return Column(children: [
       _TrendCard(
-        title: 'Sleep duration',
+        title: context.dp('Sleep duration'),
         value: validSleep.isEmpty ? '—' : '${averageSleep.toStringAsFixed(1)} h',
         subtitle: '${validSleep.length} ${context.dp('sleep logs in this period')}',
         values: sleepHours,
+        labels: labels,
         maximum: 12,
         color: AppColors.blue,
       ),
       const SizedBox(height: 10),
       _TrendCard(
-        title: 'Mood score',
+        title: context.dp('Mood score'),
         value: moodValues.isEmpty ? '—' : '${averageMood.toStringAsFixed(1)} / 5',
         subtitle: '${moodValues.length} ${context.dp('mood check-ins in this period')}',
         values: moodScores,
+        labels: labels,
         maximum: 5,
         color: AppColors.coral,
       ),
@@ -465,7 +460,7 @@ class _WellnessTrends extends StatelessWidget {
               for (final entry in _moodCounts(moodRecords).entries)
                 Chip(
                   visualDensity: VisualDensity.compact,
-                  label: Text('${entry.key} · ${entry.value}',
+                  label: Text('${context.dp(entry.key)} · ${entry.value}',
                       style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w700)),
                 ),
             ],
@@ -474,6 +469,54 @@ class _WellnessTrends extends StatelessWidget {
       ],
     ]);
   }
+
+  List<_TrendBucket> _buildBuckets() {
+    final day = dateOnly(today);
+    if (period == 'Day') {
+      return [_TrendBucket(start: day, end: day, label: 'Today')];
+    }
+    if (period == 'Week') {
+      final start = day.subtract(Duration(days: day.weekday - 1));
+      const labels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+      return List.generate(7, (index) {
+        final date = start.add(Duration(days: index));
+        return _TrendBucket(start: date, end: date, label: labels[index]);
+      });
+    }
+    if (period == 'Month') {
+      final monthStart = DateTime(day.year, day.month, 1);
+      final count = ((day.day - 1) ~/ 7) + 1;
+      return List.generate(count, (index) {
+        final start = monthStart.add(Duration(days: index * 7));
+        final candidateEnd = start.add(const Duration(days: 6));
+        final end = candidateEnd.isAfter(day) ? day : candidateEnd;
+        return _TrendBucket(start: start, end: end, label: 'W${index + 1}');
+      });
+    }
+    const monthLabels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    return List.generate(day.month, (index) {
+      final start = DateTime(day.year, index + 1, 1);
+      final nextMonth = DateTime(day.year, index + 2, 1);
+      final monthEnd = nextMonth.subtract(const Duration(days: 1));
+      final end = monthEnd.isAfter(day) ? day : monthEnd;
+      return _TrendBucket(start: start, end: end, label: monthLabels[index]);
+    });
+  }
+
+  bool _inRange(DateTime value, DateTime start, DateTime end) {
+    final date = dateOnly(value);
+    return !date.isBefore(start) && !date.isAfter(end);
+  }
+
+  double _sleepHours(AppRecord record) {
+    var duration = record.endAt!.difference(record.startAt!);
+    if (duration.isNegative) duration += const Duration(days: 1);
+    return duration.inMinutes / 60;
+  }
+
+  double _average(List<num> values) => values.isEmpty
+      ? 0
+      : values.reduce((a, b) => a + b) / values.length;
 
   int? _moodScore(String mood) => switch (mood.toLowerCase()) {
         'amazing' => 5,
@@ -500,6 +543,7 @@ class _TrendCard extends StatelessWidget {
     required this.value,
     required this.subtitle,
     required this.values,
+    required this.labels,
     required this.maximum,
     required this.color,
   });
@@ -508,6 +552,7 @@ class _TrendCard extends StatelessWidget {
   final String value;
   final String subtitle;
   final List<double> values;
+  final List<String> labels;
   final double maximum;
   final Color color;
 
@@ -524,7 +569,7 @@ class _TrendCard extends StatelessWidget {
             Text(value, style: TextStyle(color: color, fontSize: 18, fontWeight: FontWeight.w900)),
           ]),
           const SizedBox(height: 2),
-          Text(context.dp(subtitle), style: const TextStyle(color: AppColors.muted, fontSize: 9)),
+          Text(subtitle, style: const TextStyle(color: AppColors.muted, fontSize: 9)),
           const SizedBox(height: 10),
           SizedBox(
             height: 54,
@@ -532,22 +577,16 @@ class _TrendCard extends StatelessWidget {
             child: CustomPaint(painter: _WellnessBarPainter(values: values, maximum: maximum, color: color)),
           ),
           const SizedBox(height: 5),
-          const Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text('6d ago', style: TextStyle(fontSize: 8, color: AppColors.muted)),
-              Text('5d', style: TextStyle(fontSize: 8, color: AppColors.muted)),
-              Text('4d', style: TextStyle(fontSize: 8, color: AppColors.muted)),
-              Text('3d', style: TextStyle(fontSize: 8, color: AppColors.muted)),
-              Text('2d', style: TextStyle(fontSize: 8, color: AppColors.muted)),
-              Text('Yesterday', style: TextStyle(fontSize: 8, color: AppColors.muted)),
-              Text('Today', style: TextStyle(fontSize: 8, color: AppColors.muted)),
-            ],
+          Row(
+            children: labels.map((label) => Expanded(
+              child: Text(context.dp(label), textAlign: TextAlign.center,
+                  maxLines: 1, overflow: TextOverflow.clip,
+                  style: const TextStyle(fontSize: 8, color: AppColors.muted)),
+            )).toList(),
           ),
         ]),
       );
 }
-
 class _WellnessBarPainter extends CustomPainter {
   _WellnessBarPainter({required this.values, required this.maximum, required this.color});
 
