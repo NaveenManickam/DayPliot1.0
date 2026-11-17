@@ -270,7 +270,7 @@ class _QuoteCard extends StatelessWidget {
           const Icon(Icons.format_quote_rounded, color: AppColors.blue, size: 28),
           const SizedBox(width: 10),
           Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            const Text(context.dp('A LITTLE WISDOM'), style: TextStyle(color: AppColors.blue, fontSize: 9, letterSpacing: 1.1, fontWeight: FontWeight.w800)),
+            Text(context.dp('A LITTLE WISDOM'), style: TextStyle(color: AppColors.blue, fontSize: 9, letterSpacing: 1.1, fontWeight: FontWeight.w800)),
             const SizedBox(height: 5),
             Text(quote, style: const TextStyle(color: AppColors.ink, fontSize: 12, height: 1.4, fontWeight: FontWeight.w600)),
           ])),
