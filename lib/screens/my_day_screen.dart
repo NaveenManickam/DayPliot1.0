@@ -6,6 +6,7 @@ import '../providers/app_controller.dart';
 import '../widgets/record_editor.dart';
 import '../widgets/record_tile.dart';
 import '../widgets/section_title.dart';
+import '../utils/app_strings.dart';
 
 class MyDayScreen extends StatefulWidget {
   const MyDayScreen({super.key, required this.controller});
@@ -41,10 +42,10 @@ class _MyDayScreenState extends State<MyDayScreen> {
       children: [
         Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text('${controller.greeting}${controller.name.isEmpty ? '' : ', ${controller.name}'}',
+            Text('${AppStrings.translate(controller.greeting, controller.language)}${controller.name.isEmpty ? '' : ', ${controller.name}'}',
                 style: const TextStyle(fontSize: 12, color: AppColors.muted, fontWeight: FontWeight.w600)),
             const SizedBox(height: 7),
-            Text('You have ${controller.monthTaskCount} tasks\nthis month 👏',
+            Text(controller.language == 'Tamil' ? 'இந்த மாதம் ${controller.monthTaskCount} பணிகள் 👏' : 'You have ${controller.monthTaskCount} tasks\nthis month 👏',
                 style: Theme.of(context).textTheme.headlineSmall?.copyWith(height: 1.18, fontSize: 22)),
           ])),
           Container(
@@ -57,22 +58,22 @@ class _MyDayScreenState extends State<MyDayScreen> {
         TextField(
           onChanged: (value) => setState(() => _search = value),
           decoration: const InputDecoration(
-            hintText: 'Search a task...',
+            hintText: context.dp('Search a task...'),
             prefixIcon: Icon(Icons.search_rounded, size: 19),
             suffixIcon: Icon(Icons.tune_rounded, size: 18),
           ),
         ),
         const SizedBox(height: 18),
         Row(children: [
-          Expanded(child: _MetricBubble(label: 'To-do', value: '${controller.pendingToday}', icon: Icons.assignment_turned_in_rounded, color: AppColors.coral, pale: AppColors.coralPale)),
+          Expanded(child: _MetricBubble(label: context.dp('To-do'), value: '${controller.pendingToday}', icon: Icons.assignment_turned_in_rounded, color: AppColors.coral, pale: AppColors.coralPale)),
           const SizedBox(width: 10),
-          Expanded(child: _MetricBubble(label: 'Progress', value: '${(progress * 100).round()}%', icon: Icons.trending_up_rounded, color: AppColors.yellow, pale: AppColors.yellowPale, progress: progress)),
+          Expanded(child: _MetricBubble(label: context.dp('Progress'), value: '${(progress * 100).round()}%', icon: Icons.trending_up_rounded, color: AppColors.yellow, pale: AppColors.yellowPale, progress: progress)),
           const SizedBox(width: 10),
-          Expanded(child: _MetricBubble(label: 'Done', value: '$done', icon: Icons.check_circle_rounded, color: AppColors.mint, pale: AppColors.mintPale)),
+          Expanded(child: _MetricBubble(label: context.dp('Done'), value: '$done', icon: Icons.check_circle_rounded, color: AppColors.mint, pale: AppColors.mintPale)),
         ]),
-        SectionTitle('Today’s Tasks', action: 'Reorder', onAction: () => _showAllTasks(context)),
+        SectionTitle(context.dp('Today’s Tasks'), action: context.dp('Reorder'), onAction: () => _showAllTasks(context)),
         if (tasks.isEmpty)
-          _EmptyCard(title: _search.isEmpty ? 'A clear day ahead' : 'No matching tasks', subtitle: _search.isEmpty ? 'Add a task when something needs your attention.' : 'Try another search phrase.', icon: Icons.check_circle_outline_rounded)
+          _EmptyCard(title: _search.isEmpty ? context.dp('A clear day ahead') : context.dp('No matching tasks'), subtitle: _search.isEmpty ? context.dp('Add a task when something needs your attention.') : context.dp('Try another search phrase.'), icon: Icons.check_circle_outline_rounded)
         else
           SizedBox(
             height: 174,
@@ -90,9 +91,9 @@ class _MyDayScreenState extends State<MyDayScreen> {
               ),
             ),
           ),
-        SectionTitle('Your Habits', action: 'Add habit', onAction: () => showRecordEditor(context, controller, type: RecordType.habit)),
+        SectionTitle(context.dp('Your Habits'), action: context.dp('Add habit'), onAction: () => showRecordEditor(context, controller, type: RecordType.habit)),
         if (habits.isEmpty)
-          _EmptyCard(title: 'Build a small routine', subtitle: 'Track a habit and grow your streak one day at a time.', icon: Icons.local_fire_department_rounded)
+          _EmptyCard(title: context.dp('Build a small routine'), subtitle: context.dp('Track a habit and grow your streak one day at a time.'), icon: Icons.local_fire_department_rounded)
         else
           ...habits.map((habit) => _HabitRow(
                 habit: habit,
@@ -104,12 +105,12 @@ class _MyDayScreenState extends State<MyDayScreen> {
                 onTap: () => showRecordEditor(context, controller, type: RecordType.habit, record: habit),
                 onPause: () => controller.toggleHabitPause(habit),
               )),
-        SectionTitle('Today at a glance'),
+        SectionTitle(context.dp('Today at a glance')),
         Row(children: [
-          Expanded(child: _MiniSummary(icon: Icons.water_drop_rounded, title: 'Water', value: '$water / $target ml', progress: target == 0 ? 0 : (water / target).clamp(0, 1).toDouble(), color: AppColors.blue,
+          Expanded(child: _MiniSummary(icon: Icons.water_drop_rounded, title: context.dp('Water'), value: '$water / $target ml', progress: target == 0 ? 0 : (water / target).clamp(0, 1).toDouble(), color: AppColors.blue,
             onTap: () => showRecordEditor(context, controller, type: RecordType.water))),
           const SizedBox(width: 10),
-          Expanded(child: _MiniSummary(icon: Icons.fitness_center_rounded, title: 'Exercise', value: '$exercise min', progress: (exercise / 60).clamp(0, 1).toDouble(), color: AppColors.mint,
+          Expanded(child: _MiniSummary(icon: Icons.fitness_center_rounded, title: context.dp('Exercise'), value: '$exercise min', progress: (exercise / 60).clamp(0, 1).toDouble(), color: AppColors.mint,
             onTap: () => showRecordEditor(context, controller, type: RecordType.exercise))),
         ]),
         const SizedBox(height: 14),
@@ -128,7 +129,7 @@ class _MyDayScreenState extends State<MyDayScreen> {
           child: Padding(
             padding: const EdgeInsets.all(20),
             child: Column(children: [
-              Text('Today’s tasks', style: Theme.of(context).textTheme.titleLarge),
+              Text(context.dp('Today’s tasks'), style: Theme.of(context).textTheme.titleLarge),
               const SizedBox(height: 14),
               Expanded(child: ReorderableListView.builder(
                 itemCount: widget.controller.todayTasks.length,
@@ -204,12 +205,12 @@ class _HabitRow extends StatelessWidget {
           onTap: onTap,
           leading: Container(width: 42, height: 42, decoration: BoxDecoration(color: Color((habit.meta['color'] as int?) ?? 0xFFF2C45E).withValues(alpha: .16), borderRadius: BorderRadius.circular(14)), child: Icon(_habitIcon(habit.meta['icon'] as String?), color: Color((habit.meta['color'] as int?) ?? 0xFFF2C45E))),
           title: Text(habit.title, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),
-          subtitle: Text(paused ? 'Paused' : '🔥 $streak day streak  ·  $missed missed', style: const TextStyle(fontSize: 10, color: AppColors.muted)),
+          subtitle: Text(paused ? context.dp('Paused') : '🔥 $streak ${context.dp('day streak')}  ·  $missed ${context.dp('missed')}', style: const TextStyle(fontSize: 10, color: AppColors.muted)),
           trailing: Row(mainAxisSize: MainAxisSize.min, children: [
             PopupMenuButton<String>(
-              tooltip: 'Habit options',
+              tooltip: context.dp('Habit options'),
               onSelected: (_) => onPause(),
-              itemBuilder: (_) => [PopupMenuItem(value: 'pause', child: Text(paused ? 'Resume habit' : 'Pause habit'))],
+              itemBuilder: (_) => [PopupMenuItem(value: 'pause', child: Text(paused ? context.dp('Resume habit') : context.dp('Pause habit')))],
               child: const Icon(Icons.more_horiz_rounded, color: AppColors.muted),
             ),
             IconButton(
@@ -269,7 +270,7 @@ class _QuoteCard extends StatelessWidget {
           const Icon(Icons.format_quote_rounded, color: AppColors.blue, size: 28),
           const SizedBox(width: 10),
           Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            const Text('A LITTLE WISDOM', style: TextStyle(color: AppColors.blue, fontSize: 9, letterSpacing: 1.1, fontWeight: FontWeight.w800)),
+            const Text(context.dp('A LITTLE WISDOM'), style: TextStyle(color: AppColors.blue, fontSize: 9, letterSpacing: 1.1, fontWeight: FontWeight.w800)),
             const SizedBox(height: 5),
             Text(quote, style: const TextStyle(color: AppColors.ink, fontSize: 12, height: 1.4, fontWeight: FontWeight.w600)),
           ])),
