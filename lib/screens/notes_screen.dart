@@ -40,7 +40,7 @@ class _NotesScreenState extends State<NotesScreen> {
           FilledButton.icon(
             onPressed: () => showRecordEditor(context, widget.controller, type: RecordType.note),
             icon: const Icon(Icons.add_rounded, size: 17),
-            label: const Text('New note', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700)),
+            label: Text(context.dp('New note'), style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700)),
             style: FilledButton.styleFrom(backgroundColor: AppColors.blue, padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 10)),
           ),
         ]),
@@ -120,7 +120,7 @@ class _NoteCard extends StatelessWidget {
               ])),
               PopupMenuButton<String>(
                 onSelected: (value) { if (value == 'delete') onDelete(); if (value == 'edit') onTap(); },
-                itemBuilder: (context) => const [PopupMenuItem(value: 'edit', child: Text('Edit')), PopupMenuItem(value: 'delete', child: Text('Delete'))],
+                itemBuilder: (context) => [PopupMenuItem(value: 'edit', child: Text(context.dp('Edit'))), PopupMenuItem(value: 'delete', child: Text(context.dp('Delete')))],
                 icon: const Icon(Icons.more_horiz_rounded, color: AppColors.muted),
               ),
             ]),

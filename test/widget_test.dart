@@ -6,6 +6,8 @@ void main() {
   group('Time-based greeting', () {
     test('uses the expected greeting across all day periods', () {
       expect(AppController.greetingForHour(0), 'Good Night');
+      expect(AppController.greetingForHour(4), 'Good Night');
+      expect(AppController.greetingForHour(5), 'Good Morning');
       expect(AppController.greetingForHour(11), 'Good Morning');
       expect(AppController.greetingForHour(12), 'Good Afternoon');
       expect(AppController.greetingForHour(16), 'Good Afternoon');

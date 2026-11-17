@@ -368,11 +368,11 @@ class _Heatmap extends StatelessWidget {
         })),
         const SizedBox(height: 10),
         Row(mainAxisAlignment: MainAxisAlignment.end, children: [
-          const Text('Less', style: TextStyle(fontSize: 9, color: AppColors.muted)),
+          Text(context.dp('Less'), style: const TextStyle(fontSize: 9, color: AppColors.muted)),
           const SizedBox(width: 5),
           for (final color in [AppColors.line, const Color(0xFFC9D0FF), const Color(0xFF8E9AFF), AppColors.blue])
             Container(width: 9, height: 9, margin: const EdgeInsets.only(right: 3), decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(2))),
-          const Text('More', style: TextStyle(fontSize: 9, color: AppColors.muted)),
+          Text(context.dp('More'), style: const TextStyle(fontSize: 9, color: AppColors.muted)),
         ]),
       ]),
     );

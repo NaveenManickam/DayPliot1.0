@@ -227,20 +227,20 @@ class _PinGateState extends State<PinGate> {
           child: Column(mainAxisSize: MainAxisSize.min, children: [
             Container(width: 66, height: 66, decoration: BoxDecoration(color: AppColors.bluePale, borderRadius: BorderRadius.circular(21)), child: const Icon(Icons.lock_rounded, color: AppColors.blue, size: 31)),
             const SizedBox(height: 17),
-            const Text('Welcome back', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: AppColors.ink)),
+            Text(AppStrings.translate('Welcome back', widget.controller.language), style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: AppColors.ink)),
             const SizedBox(height: 6),
             Text(widget.controller.hasPin
-                ? 'Enter your DayPilot PIN to continue.'
-                : 'Use your device biometrics to continue.',
+                ? AppStrings.translate('Enter your DayPilot PIN to continue.', widget.controller.language)
+                : AppStrings.translate('Use your device biometrics to continue.', widget.controller.language),
                 style: const TextStyle(color: AppColors.muted, fontSize: 12)),
             if (widget.controller.hasPin) ...[
               const SizedBox(height: 20),
               TextField(controller: _pin, autofocus: true, obscureText: true, keyboardType: TextInputType.number, maxLength: 8, textAlign: TextAlign.center, decoration: const InputDecoration(counterText: '', hintText: '••••')),
               if (_error != null) Padding(padding: const EdgeInsets.only(top: 8), child: Text(_error!, style: const TextStyle(color: AppColors.coral, fontSize: 11))),
               const SizedBox(height: 16),
-              FilledButton(onPressed: _busy ? null : _unlockWithPin, style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(48), backgroundColor: AppColors.blue), child: _busy ? const CircularProgressIndicator(color: Colors.white) : const Text('Unlock')),
+              FilledButton(onPressed: _busy ? null : _unlockWithPin, style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(48), backgroundColor: AppColors.blue), child: _busy ? const CircularProgressIndicator(color: Colors.white) : Text(AppStrings.translate('Unlock', widget.controller.language))),
             ] else if (_error != null) Padding(padding: const EdgeInsets.only(top: 8), child: Text(_error!, style: const TextStyle(color: AppColors.coral, fontSize: 11))),
-            if (widget.controller.biometricEnabled) TextButton.icon(onPressed: _busy ? null : _unlockWithBiometrics, icon: const Icon(Icons.fingerprint_rounded), label: const Text('Use biometrics')),
+            if (widget.controller.biometricEnabled) TextButton.icon(onPressed: _busy ? null : _unlockWithBiometrics, icon: const Icon(Icons.fingerprint_rounded), label: Text(AppStrings.translate('Use biometrics', widget.controller.language))),
           ]),
         )))),
       );
@@ -249,7 +249,7 @@ class _PinGateState extends State<PinGate> {
     setState(() { _busy = true; _error = null; });
     final ok = await widget.controller.verifyPin(_pin.text);
     if (mounted) {
-      setState(() { _busy = false; _error = ok ? null : 'Incorrect PIN. Please try again.'; });
+      setState(() { _busy = false; _error = ok ? null : AppStrings.translate('Incorrect PIN. Please try again.', widget.controller.language); });
       if (ok) widget.onUnlocked();
     }
   }

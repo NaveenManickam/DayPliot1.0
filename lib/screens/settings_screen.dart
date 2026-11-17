@@ -65,7 +65,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               onChanged: (value) async {
                 if (value) {
                   final ok = await controller.requestNotificationPermissions();
-                  if (!ok && mounted) _message('Android notification permission was not granted.');
+                  if (!ok && mounted) _message(context.dp('Android notification permission was not granted.'));
                 }
                 await controller.setNotificationsEnabled(value);
               },
@@ -106,7 +106,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final controller = TextEditingController(text: widget.controller.name);
     final result = await showDialog<String>(context: context, builder: (context) => AlertDialog(
       title: Text(context.dp('Your name')),
-      content: TextField(controller: controller, autofocus: true, textCapitalization: TextCapitalization.words, decoration: const InputDecoration(hintText: 'Enter your name')),
+      content: TextField(controller: controller, autofocus: true, textCapitalization: TextCapitalization.words, decoration: InputDecoration(hintText: context.dp('Enter your name'))),
       actions: [TextButton(onPressed: () => Navigator.pop(context), child: Text(context.dp('Cancel'))), FilledButton(onPressed: () => Navigator.pop(context, controller.text), child: Text(context.dp('Save')))],
     ));
     if (result != null) await widget.controller.setName(result);
@@ -123,11 +123,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
         TextField(controller: second, keyboardType: TextInputType.number, obscureText: true, maxLength: 8, decoration: InputDecoration(labelText: context.dp('Confirm PIN'))),
       ]),
       actions: [TextButton(onPressed: () => Navigator.pop(context), child: Text(context.dp('Cancel'))), FilledButton(onPressed: () {
-        if (first.text.length < 4 || first.text.length > 8 || first.text != second.text || int.tryParse(first.text) == null) return;
+        if (first.text.length < 4 || first.text.length > 8 || first.text != second.text || int.tryParse(first.text) == null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(context.dp('PIN must be 4 to 8 digits and both entries must match.'))),
+          );
+          return;
+        }
         Navigator.pop(context, first.text);
       }, child: Text(context.dp('Save PIN')))],
     ));
-    if (result != null) { await widget.controller.setPin(result); if (mounted) _message('Your app PIN has been saved.'); }
+    if (result != null) { await widget.controller.setPin(result); if (mounted) _message(context.dp('Your app PIN has been saved.')); }
     first.dispose(); second.dispose();
   }
 
@@ -144,11 +149,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
     if (!enable) { await widget.controller.setBiometricEnabled(false); return; }
     try {
       final available = await _auth.isAvailable();
-      if (!available) { if (mounted) _message('No enrolled biometric is available on this device.'); return; }
+      if (!available) { if (mounted) _message(context.dp('No enrolled biometric is available on this device.')); return; }
       final passed = await _auth.authenticate(reason: 'Confirm to enable DayPilot biometric unlock');
       if (passed) await widget.controller.setBiometricEnabled(true);
     } catch (error) {
-      if (mounted) _message('Biometric setup is not available: $error');
+      if (mounted) _message('${context.dp('Biometric setup is not available:')} $error');
     }
   }
 
