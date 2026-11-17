@@ -57,7 +57,7 @@ class _MyDayScreenState extends State<MyDayScreen> {
         const SizedBox(height: 18),
         TextField(
           onChanged: (value) => setState(() => _search = value),
-          decoration: const InputDecoration(
+          decoration: InputDecoration(
             hintText: context.dp('Search a task...'),
             prefixIcon: Icon(Icons.search_rounded, size: 19),
             suffixIcon: Icon(Icons.tune_rounded, size: 18),
