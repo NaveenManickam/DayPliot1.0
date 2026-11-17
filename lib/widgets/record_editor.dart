@@ -504,6 +504,6 @@ class _RecordEditorSheetState extends State<RecordEditorSheet> {
 
   String _moodLabel(String value) => switch (value) {
         'Amazing' => '😄 ${_tr('Amazing')}', 'Good' => '🙂 ${_tr('Good')}', 'Okay' => '😐 ${_tr('Okay')}',
-        'Low' => '😔 ${_tr('Low')}', 'Stressed' => '😣 ${_tr('Stressed')}', _ => _tr(value),
+        'Low' => '😔 ${_tr('Low mood')}', 'Stressed' => '😣 ${_tr('Stressed')}', _ => _tr(value),
       };
 }
