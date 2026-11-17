@@ -149,28 +149,77 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Future<void> _exportBackup() async {
-    final data = widget.controller.exportBackup();
-    await showDialog<void>(context: context, builder: (context) => AlertDialog(
-      title: const Text('DayPilot backup'),
-      content: SizedBox(width: double.maxFinite, height: 300, child: SingleChildScrollView(child: SelectableText(data, style: const TextStyle(fontSize: 10)))),
-      actions: [TextButton(onPressed: () => Navigator.pop(context), child: const Text('Close')), FilledButton.icon(onPressed: () async { await Clipboard.setData(ClipboardData(text: data)); if (context.mounted) Navigator.pop(context); if (mounted) _message('Backup JSON copied. Save it somewhere safe.'); }, icon: const Icon(Icons.copy_rounded, size: 16), label: const Text('Copy JSON'))],
-    ));
+    final passphrase = TextEditingController();
+    final confirmPassphrase = TextEditingController();
+    final chosen = await showDialog<String>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Protect your backup'),
+        content: Column(mainAxisSize: MainAxisSize.min, children: [
+          const Text('Choose a password of at least 8 characters. You will need it to restore this backup.', style: TextStyle(fontSize: 12)),
+          const SizedBox(height: 12),
+          TextField(controller: passphrase, obscureText: true, decoration: const InputDecoration(labelText: 'Backup password')),
+          const SizedBox(height: 8),
+          TextField(controller: confirmPassphrase, obscureText: true, decoration: const InputDecoration(labelText: 'Confirm password')),
+        ]),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+          FilledButton(onPressed: () {
+            if (passphrase.text.length < 8 || passphrase.text != confirmPassphrase.text) return;
+            Navigator.pop(context, passphrase.text);
+          }, child: const Text('Encrypt backup')),
+        ],
+      ),
+    );
+    passphrase.dispose();
+    confirmPassphrase.dispose();
+    if (chosen == null) return;
+    setState(() => _working = true);
+    try {
+      final data = await widget.controller.exportEncryptedBackup(chosen);
+      await Clipboard.setData(ClipboardData(text: data));
+      if (mounted) _message('Encrypted backup copied. Keep your password safe; it cannot be recovered.');
+    } catch (error) {
+      if (mounted) _message('Could not create backup: $error');
+    } finally {
+      if (mounted) setState(() => _working = false);
+    }
   }
 
   Future<void> _importBackup() async {
     final source = TextEditingController();
-    final confirm = await showDialog<bool>(context: context, builder: (context) => AlertDialog(
-      title: const Text('Restore backup'),
-      content: SizedBox(width: double.maxFinite, child: TextField(controller: source, minLines: 5, maxLines: 9, decoration: const InputDecoration(hintText: 'Paste your DayPilot backup JSON here'), style: const TextStyle(fontSize: 11))),
-      actions: [TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancel')), FilledButton(onPressed: () => Navigator.pop(context, true), child: const Text('Restore'))],
-    ));
+    final passphrase = TextEditingController();
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Restore backup'),
+        content: SizedBox(
+          width: double.maxFinite,
+          child: Column(mainAxisSize: MainAxisSize.min, children: [
+            TextField(controller: source, minLines: 5, maxLines: 8, decoration: const InputDecoration(hintText: 'Paste your DayPilot backup JSON here'), style: const TextStyle(fontSize: 11)),
+            const SizedBox(height: 10),
+            TextField(controller: passphrase, obscureText: true, decoration: const InputDecoration(labelText: 'Backup password (encrypted backups)')),
+          ]),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancel')),
+          FilledButton(onPressed: () => Navigator.pop(context, true), child: const Text('Restore')),
+        ],
+      ),
+    );
     if (confirm == true) {
       setState(() => _working = true);
-      try { await widget.controller.importBackup(source.text); if (mounted) _message('Backup restored.'); }
-      catch (error) { if (mounted) _message('Could not restore backup: $error'); }
-      finally { if (mounted) setState(() => _working = false); }
+      try {
+        await widget.controller.importEncryptedBackup(source.text, passphrase.text);
+        if (mounted) _message('Backup restored.');
+      } catch (error) {
+        if (mounted) _message('Could not restore backup. Check the password and backup file.');
+      } finally {
+        if (mounted) setState(() => _working = false);
+      }
     }
     source.dispose();
+    passphrase.dispose();
   }
 
   void _message(String value) => ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(value)));
