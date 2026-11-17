@@ -97,8 +97,10 @@ class AppController extends ChangeNotifier {
     return _language == 'Tamil' ? quotesTamil[index] : quotes[index];
   }
 
-  String get greeting {
-    final hour = DateTime.now().hour;
+  String get greeting => greetingForHour(DateTime.now().hour);
+
+  static String greetingForHour(int hour) {
+    if (hour < 0 || hour > 23) throw RangeError.range(hour, 0, 23, 'hour');
     if (hour < 12) return 'Good Morning';
     if (hour < 17) return 'Good Afternoon';
     if (hour < 21) return 'Good Evening';

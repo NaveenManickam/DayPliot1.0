@@ -1,5 +1,8 @@
+import 'dart:convert';
+import 'dart:typed_data';
+
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 import '../core/app_constants.dart';
 import '../providers/app_controller.dart';
@@ -157,7 +160,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       builder: (context) => AlertDialog(
         title: Text(context.dp('Protect your backup')),
         content: Column(mainAxisSize: MainAxisSize.min, children: [
-          Text(context.dp('Choose a password of at least 8 characters. You will need it to restore this backup.'), style: TextStyle(fontSize: 12)),
+          Text(context.dp('Choose a password of at least 8 characters. You will need it to restore this backup.'), style: const TextStyle(fontSize: 12)),
           const SizedBox(height: 12),
           TextField(controller: passphrase, obscureText: true, decoration: InputDecoration(labelText: context.dp('Backup password'))),
           const SizedBox(height: 8),
@@ -175,13 +178,23 @@ class _SettingsScreenState extends State<SettingsScreen> {
     passphrase.dispose();
     confirmPassphrase.dispose();
     if (chosen == null) return;
+
     setState(() => _working = true);
     try {
       final data = await widget.controller.exportEncryptedBackup(chosen);
-      await Clipboard.setData(ClipboardData(text: data));
-      if (mounted) _message('Encrypted backup copied. Keep your password safe; it cannot be recovered.');
+      final stamp = DateTime.now().toIso8601String().replaceAll(':', '-').split('.').first;
+      final output = await FilePicker.saveFile(
+        dialogTitle: context.dp('Save encrypted DayPilot backup'),
+        fileName: 'daypilot-backup-$stamp.json',
+        bytes: Uint8List.fromList(utf8.encode(data)),
+      );
+      if (mounted) {
+        _message(output == null
+            ? context.dp('Backup save cancelled.')
+            : context.dp('Encrypted backup saved. Keep your password safe.'));
+      }
     } catch (error) {
-      if (mounted) _message('Could not create backup: $error');
+      if (mounted) _message('${context.dp('Could not create backup')}: $error');
     } finally {
       if (mounted) setState(() => _working = false);
     }
@@ -190,33 +203,86 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Future<void> _importBackup() async {
     final source = TextEditingController();
     final passphrase = TextEditingController();
+    String? selectedBackup;
+    String? selectedFileName;
+
     final confirm = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(context.dp('Restore backup')),
-        content: SizedBox(
-          width: double.maxFinite,
-          child: Column(mainAxisSize: MainAxisSize.min, children: [
-            TextField(controller: source, minLines: 5, maxLines: 8, decoration: InputDecoration(hintText: context.dp('Paste your DayPilot backup JSON here')), style: const TextStyle(fontSize: 11)),
-            const SizedBox(height: 10),
-            TextField(controller: passphrase, obscureText: true, decoration: InputDecoration(labelText: context.dp('Backup password (encrypted backups)'))),
-          ]),
+      builder: (context) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          title: Text(context.dp('Restore backup')),
+          content: SizedBox(
+            width: double.maxFinite,
+            child: Column(mainAxisSize: MainAxisSize.min, children: [
+              OutlinedButton.icon(
+                onPressed: () async {
+                  try {
+                    final file = await FilePicker.pickFile(
+                      type: FileType.custom,
+                      allowedExtensions: ['json'],
+                    );
+                    if (file == null) return;
+                    final content = utf8.decode(await file.readAsBytes());
+                    setDialogState(() {
+                      selectedBackup = content;
+                      selectedFileName = file.name;
+                      source.clear();
+                    });
+                  } catch (error) {
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('${context.dp('Could not read backup file')}: $error')),
+                      );
+                    }
+                  }
+                },
+                icon: const Icon(Icons.folder_open_rounded, size: 17),
+                label: Text(context.dp('Choose backup JSON file')),
+              ),
+              if (selectedFileName != null)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: Text('${context.dp('Selected file')}: $selectedFileName',
+                      style: const TextStyle(fontSize: 10, color: AppColors.muted)),
+                ),
+              TextField(
+                controller: source,
+                minLines: 3,
+                maxLines: 5,
+                decoration: InputDecoration(hintText: context.dp('Or paste backup JSON here')),
+                style: const TextStyle(fontSize: 11),
+                onChanged: (_) => setDialogState(() => selectedBackup = null),
+              ),
+              const SizedBox(height: 10),
+              TextField(
+                controller: passphrase,
+                obscureText: true,
+                decoration: InputDecoration(labelText: context.dp('Backup password (encrypted backups)')),
+              ),
+            ]),
+          ),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(context, false), child: Text(context.dp('Cancel'))),
+            FilledButton(onPressed: () => Navigator.pop(context, true), child: Text(context.dp('Restore'))),
+          ],
         ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: Text(context.dp('Cancel'))),
-          FilledButton(onPressed: () => Navigator.pop(context, true), child: Text(context.dp('Restore'))),
-        ],
       ),
     );
+
     if (confirm == true) {
-      setState(() => _working = true);
-      try {
-        await widget.controller.importEncryptedBackup(source.text, passphrase.text);
-        if (mounted) _message('Backup restored.');
-      } catch (error) {
-        if (mounted) _message('Could not restore backup. Check the password and backup file.');
-      } finally {
-        if (mounted) setState(() => _working = false);
+      final backupData = selectedBackup ?? source.text;
+      if (backupData.trim().isEmpty) {
+        _message(context.dp('Choose a backup file or paste backup JSON.'));
+      } else {
+        setState(() => _working = true);
+        try {
+          await widget.controller.importEncryptedBackup(backupData, passphrase.text);
+          if (mounted) _message(context.dp('Backup restored.'));
+        } catch (error) {
+          if (mounted) _message(context.dp('Could not restore backup. Check the password and backup file.'));
+        } finally {
+          if (mounted) setState(() => _working = false);
+        }
       }
     }
     source.dispose();

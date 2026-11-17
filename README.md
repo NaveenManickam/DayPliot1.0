@@ -18,7 +18,7 @@ DayPilot is a Flutter/Dart Android planner with a soft-white rounded-card interf
 - **My Progress:** day/week/month/year task totals, task-completion chart, habit consistency, activity heatmap, water and exercise totals, sleep-duration and mood-score trend charts, and editable recent sleep/mood/journal records.
 - **Quick add:** Task, Habit, Event, Note, Journal, Water, Exercise, Sleep and Mood.
 - **Personal logs:** daily journal, water intake and target, exercise duration, bedtime/wake time, and mood check-ins.
-- **Settings:** display name, light/dark/system appearance, English/Tamil language, local notifications, optional PIN, Android biometric unlock, and encrypted backup export/restore.
+- **Settings:** display name, light/dark/system appearance, English/Tamil language, local notifications, optional PIN, Android biometric unlock, and encrypted backup export/restore through Android's file picker.
 - **Offline storage:** SQLite records and local preferences. Core app use does not require network access.
 
 ## Reminders
@@ -28,7 +28,7 @@ Task and event reminders are one-time scheduled reminders. Habit reminders repea
 ## Security and backups
 
 - App PINs are stored as salted PBKDF2-HMAC-SHA256 hashes.
-- Exported backups use PBKDF2-HMAC-SHA256 key derivation and AES-256-GCM authenticated encryption. The user-created password is required to restore an encrypted backup.
+- Exported backups are saved as JSON files using Android's save-file picker. They use PBKDF2-HMAC-SHA256 key derivation and AES-256-GCM authenticated encryption. Restore supports selecting a JSON file or pasting backup JSON. The user-created password is required to restore an encrypted backup.
 - Older plain JSON backups remain importable for backward compatibility.
 - The app PIN is an access gate; it does **not** encrypt the SQLite database itself. Local database encryption and secure key storage remain a separate security enhancement. Keep the backup password safe; it cannot be recovered.
 

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../core/app_constants.dart';
@@ -16,8 +18,46 @@ class MyDayScreen extends StatefulWidget {
   State<MyDayScreen> createState() => _MyDayScreenState();
 }
 
-class _MyDayScreenState extends State<MyDayScreen> {
+class _MyDayScreenState extends State<MyDayScreen> with WidgetsBindingObserver {
   String _search = '';
+  Timer? _clockTimer;
+  late String _lastGreeting;
+  late String _lastDay;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    _lastGreeting = widget.controller.greeting;
+    _lastDay = _dayKey(DateTime.now());
+    _clockTimer = Timer.periodic(const Duration(minutes: 1), (_) => _refreshClock());
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) _refreshClock();
+  }
+
+  void _refreshClock() {
+    if (!mounted) return;
+    final greeting = widget.controller.greeting;
+    final day = _dayKey(DateTime.now());
+    if (greeting != _lastGreeting || day != _lastDay) {
+      setState(() {
+        _lastGreeting = greeting;
+        _lastDay = day;
+      });
+    }
+  }
+
+  String _dayKey(DateTime date) => '${date.year}-${date.month}-${date.day}';
+
+  @override
+  void dispose() {
+    _clockTimer?.cancel();
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {

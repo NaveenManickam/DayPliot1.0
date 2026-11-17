@@ -124,6 +124,19 @@ class AppStrings {
     'Save date note': 'தேதி குறிப்பைச் சேமி', 'Save journal': 'நாள்குறிப்பைச் சேமி',
     'Save water entry': 'தண்ணீர் பதிவைச் சேமி', 'Save exercise': 'உடற்பயிற்சியைச் சேமி',
     'Save sleep log': 'தூக்க பதிவைச் சேமி', 'Save mood entry': 'மனநிலை பதிவைச் சேமி',
+    'Today': 'இன்று', 'Mon': 'திங்', 'Tue': 'செவ்', 'Wed': 'புத', 'Thu': 'வியா', 'Fri': 'வெள்', 'Sat': 'சனி', 'Sun': 'ஞாயி',
+    'W1': 'வா1', 'W2': 'வா2', 'W3': 'வா3', 'W4': 'வா4', 'W5': 'வா5',
+    'Jan': 'ஜன', 'Feb': 'பிப்', 'Mar': 'மார்', 'Apr': 'ஏப்', 'May': 'மே', 'Jun': 'ஜூன்', 'Jul': 'ஜூலை', 'Aug': 'ஆக', 'Sep': 'செப்', 'Oct': 'அக்', 'Nov': 'நவ', 'Dec': 'டிச',
+    'Save encrypted DayPilot backup': 'குறியாக்கப்பட்ட DayPilot காப்புப்பிரதியைச் சேமி',
+    'Backup save cancelled.': 'காப்புப்பிரதி சேமிப்பு ரத்து செய்யப்பட்டது.',
+    'Encrypted backup saved. Keep your password safe.': 'குறியாக்கப்பட்ட காப்புப்பிரதி சேமிக்கப்பட்டது. கடவுச்சொல்லை பாதுகாப்பாக வைத்திருங்கள்.',
+    'Could not create backup': 'காப்புப்பிரதியை உருவாக்க முடியவில்லை',
+    'Choose backup JSON file': 'காப்புப்பிரதி JSON கோப்பைத் தேர்ந்தெடுக்கவும்',
+    'Selected file': 'தேர்ந்தெடுத்த கோப்பு',
+    'Or paste backup JSON here': 'அல்லது காப்புப்பிரதி JSON-ஐ இங்கே ஒட்டவும்',
+    'Could not read backup file': 'காப்புப்பிரதி கோப்பைப் படிக்க முடியவில்லை',
+    'Choose a backup file or paste backup JSON.': 'காப்புப்பிரதி கோப்பைத் தேர்ந்தெடுக்கவும் அல்லது JSON-ஐ ஒட்டவும்',
+
   };
 }
 
