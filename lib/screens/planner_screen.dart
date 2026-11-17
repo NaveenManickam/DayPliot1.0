@@ -6,6 +6,7 @@ import '../providers/app_controller.dart';
 import '../utils/date_helpers.dart';
 import '../widgets/record_editor.dart';
 import '../widgets/record_tile.dart';
+import '../utils/app_strings.dart';
 
 class PlannerScreen extends StatefulWidget {
   const PlannerScreen({super.key, required this.controller});
@@ -30,11 +31,11 @@ class _PlannerScreenState extends State<PlannerScreen> {
       padding: const EdgeInsets.fromLTRB(20, 12, 20, 118),
       children: [
         Row(children: [
-          Expanded(child: Text('My Planner', style: Theme.of(context).textTheme.headlineSmall)),
+          Expanded(child: Text(context.dp('My Planner'), style: Theme.of(context).textTheme.headlineSmall)),
           FilledButton.icon(
             onPressed: () => showRecordEditor(context, controller, type: RecordType.task, initialDate: _selected),
             icon: const Icon(Icons.add_rounded, size: 16),
-            label: const Text('Add Task', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700)),
+            label: Text(context.dp('Add Task'), style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700)),
             style: FilledButton.styleFrom(backgroundColor: AppColors.blue, padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 10)),
           ),
         ]),
@@ -50,7 +51,7 @@ class _PlannerScreenState extends State<PlannerScreen> {
                   duration: const Duration(milliseconds: 180),
                   padding: const EdgeInsets.symmetric(vertical: 10),
                   decoration: BoxDecoration(color: _view == item.$1 ? AppColors.blue : Colors.transparent, borderRadius: BorderRadius.circular(12)),
-                  child: Text(item.$1, textAlign: TextAlign.center, style: TextStyle(color: _view == item.$1 ? Colors.white : AppColors.muted, fontSize: 11, fontWeight: FontWeight.w700)),
+                  child: Text(context.dp(item.$1), textAlign: TextAlign.center, style: TextStyle(color: _view == item.$1 ? Colors.white : AppColors.muted, fontSize: 11, fontWeight: FontWeight.w700)),
                 ),
               )),
           ]),
@@ -60,7 +61,7 @@ class _PlannerScreenState extends State<PlannerScreen> {
           IconButton(onPressed: _previous, icon: const Icon(Icons.chevron_left_rounded)),
           Expanded(child: Text(_view == 'Day' ? shortDate(_selected) : monthHeading(_cursor), textAlign: TextAlign.center,
               style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16, color: AppColors.ink))),
-          TextButton(onPressed: () => setState(() { _cursor = dateOnly(DateTime.now()); _selected = dateOnly(DateTime.now()); }), child: const Text('Today', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700))),
+          TextButton(onPressed: () => setState(() { _cursor = dateOnly(DateTime.now()); _selected = dateOnly(DateTime.now()); }), child: Text(context.dp('Today'), style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700))),
           IconButton(onPressed: _next, icon: const Icon(Icons.chevron_right_rounded)),
         ]),
         if (_view == 'Month') _buildMonthGrid(controller),
@@ -71,9 +72,9 @@ class _PlannerScreenState extends State<PlannerScreen> {
           const SizedBox(height: 20),
           Row(children: [
             Expanded(child: Text(shortDate(_selected), style: Theme.of(context).textTheme.titleLarge)),
-            _SmallAction(icon: Icons.add_task_rounded, label: 'Task', onTap: () => showRecordEditor(context, controller, type: RecordType.task, initialDate: _selected)),
+            _SmallAction(icon: Icons.add_task_rounded, label: context.dp('Task'), onTap: () => showRecordEditor(context, controller, type: RecordType.task, initialDate: _selected)),
             const SizedBox(width: 5),
-            _SmallAction(icon: Icons.event_rounded, label: 'Event', onTap: () => showRecordEditor(context, controller, type: RecordType.event, initialDate: _selected)),
+            _SmallAction(icon: Icons.event_rounded, label: context.dp('Event'), onTap: () => showRecordEditor(context, controller, type: RecordType.event, initialDate: _selected)),
           ]),
           const SizedBox(height: 11),
           _buildSelectedDateItems(controller),
@@ -81,7 +82,7 @@ class _PlannerScreenState extends State<PlannerScreen> {
           OutlinedButton.icon(
             onPressed: () => showRecordEditor(context, controller, type: RecordType.dateNote, initialDate: _selected),
             icon: const Icon(Icons.sticky_note_2_outlined, size: 17),
-            label: const Text('Add a note to this date'),
+            label: Text(context.dp('Add a note to this date'),
           ),
         ],
       ],
@@ -158,7 +159,7 @@ class _PlannerScreenState extends State<PlannerScreen> {
             padding: const EdgeInsets.symmetric(vertical: 12),
             decoration: BoxDecoration(color: selected ? AppColors.blue : Colors.transparent, borderRadius: BorderRadius.circular(15)),
             child: Column(children: [
-              Text(DateFormatE.weekday(date), style: TextStyle(fontSize: 9, fontWeight: FontWeight.w700, color: selected ? Colors.white70 : AppColors.muted)),
+              Text(context.dp(DateFormatE.weekday(date)), style: TextStyle(fontSize: 9, fontWeight: FontWeight.w700, color: selected ? Colors.white70 : AppColors.muted)),
               const SizedBox(height: 7),
               Text('${date.day}', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: selected ? Colors.white : AppColors.ink)),
               const SizedBox(height: 6),
@@ -216,7 +217,7 @@ class _PlannerScreenState extends State<PlannerScreen> {
   Widget _emptyDay() => Container(
         padding: const EdgeInsets.all(24),
         decoration: BoxDecoration(color: Theme.of(context).cardTheme.color, borderRadius: BorderRadius.circular(18)),
-        child: const Center(child: Column(children: [Icon(Icons.event_available_rounded, color: AppColors.blue, size: 26), SizedBox(height: 8), Text('Nothing planned yet', style: TextStyle(fontWeight: FontWeight.w700)), SizedBox(height: 4), Text('Add a task, event or date note.', style: TextStyle(fontSize: 11, color: AppColors.muted))])),
+        child: Center(child: Column(children: [const Icon(Icons.event_available_rounded, color: AppColors.blue, size: 26), const SizedBox(height: 8), Text(context.dp('Nothing planned yet'), style: const TextStyle(fontWeight: FontWeight.w700)), const SizedBox(height: 4), Text(context.dp('Add a task, event or date note.'), style: const TextStyle(fontSize: 11, color: AppColors.muted))])),
       );
 
   void _previous() => setState(() {
