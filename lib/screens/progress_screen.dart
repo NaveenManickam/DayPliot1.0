@@ -34,6 +34,12 @@ class _ProgressScreenState extends State<ProgressScreen> {
     final longestStreaks = habits.map(widget.controller.longestHabitStreak).toList();
     final bestStreak = longestStreaks.isEmpty ? 0 : longestStreaks.reduce((a, b) => a > b ? a : b);
     final values = _chartValues(now);
+    final sleepRecords = widget.controller.recordsOf(RecordType.sleep)
+        .where((r) => !r.date.isBefore(range.$1) && !r.date.isAfter(range.$2))
+        .toList();
+    final moodRecords = widget.controller.recordsOf(RecordType.mood)
+        .where((r) => !r.date.isBefore(range.$1) && !r.date.isAfter(range.$2))
+        .toList();
 
     return ListView(
       padding: const EdgeInsets.fromLTRB(20, 12, 20, 118),
@@ -115,6 +121,14 @@ class _ProgressScreenState extends State<ProgressScreen> {
           const SizedBox(width: 10),
           Expanded(child: _StatCard(label: 'Exercise', value: '$exerciseMinutes min', icon: Icons.fitness_center_rounded, color: AppColors.mint, pale: AppColors.mintPale)),
         ]),
+        const SizedBox(height: 21),
+        Text('Sleep & mood trends', style: Theme.of(context).textTheme.titleLarge),
+        const SizedBox(height: 12),
+        _WellnessTrends(
+          sleepRecords: sleepRecords,
+          moodRecords: moodRecords,
+          today: now,
+        ),
         const SizedBox(height: 18),
         Text('Sleep & mood history', style: Theme.of(context).textTheme.titleLarge),
         const SizedBox(height: 10),
@@ -362,3 +376,207 @@ class _Heatmap extends StatelessWidget {
     );
   }
 }
+class _WellnessTrends extends StatelessWidget {
+  const _WellnessTrends({
+    required this.sleepRecords,
+    required this.moodRecords,
+    required this.today,
+  });
+
+  final List<AppRecord> sleepRecords;
+  final List<AppRecord> moodRecords;
+  final DateTime today;
+
+  @override
+  Widget build(BuildContext context) {
+    final validSleep = sleepRecords.where((r) => r.startAt != null && r.endAt != null).toList();
+    final sleepHours = <double>[];
+    final moodScores = <double>[];
+    final moodValues = moodRecords
+        .map((r) => _moodScore(r.meta['mood'] as String? ?? r.title))
+        .whereType<int>()
+        .toList();
+    for (var offset = 6; offset >= 0; offset--) {
+      final day = today.subtract(Duration(days: offset));
+      final nights = validSleep.where((r) =>
+          r.date.year == day.year && r.date.month == day.month && r.date.day == day.day);
+      final durations = nights.map((r) {
+        var duration = r.endAt!.difference(r.startAt!);
+        if (duration.isNegative) duration += const Duration(days: 1);
+        return duration.inMinutes / 60;
+      }).toList();
+      sleepHours.add(durations.isEmpty
+          ? 0
+          : durations.reduce((a, b) => a + b) / durations.length);
+
+      final dayMoods = moodRecords.where((r) =>
+          r.date.year == day.year && r.date.month == day.month && r.date.day == day.day);
+      final scores = dayMoods
+          .map((r) => _moodScore(r.meta['mood'] as String? ?? r.title))
+          .whereType<int>()
+          .toList();
+      moodScores.add(scores.isEmpty
+          ? 0
+          : scores.reduce((a, b) => a + b) / scores.length);
+    }
+    final averageSleep = validSleep.isEmpty
+        ? 0.0
+        : validSleep.map((r) {
+            var duration = r.endAt!.difference(r.startAt!);
+            if (duration.isNegative) duration += const Duration(days: 1);
+            return duration.inMinutes / 60;
+          }).reduce((a, b) => a + b) / validSleep.length;
+    final averageMood = moodValues.isEmpty
+        ? 0.0
+        : moodValues.reduce((a, b) => a + b) / moodValues.length;
+
+    return Column(children: [
+      _TrendCard(
+        title: 'Sleep duration',
+        value: validSleep.isEmpty ? '—' : '${averageSleep.toStringAsFixed(1)} h',
+        subtitle: '${validSleep.length} sleep logs in this period',
+        values: sleepHours,
+        maximum: 12,
+        color: AppColors.blue,
+      ),
+      const SizedBox(height: 10),
+      _TrendCard(
+        title: 'Mood score',
+        value: moodValues.isEmpty ? '—' : '${averageMood.toStringAsFixed(1)} / 5',
+        subtitle: '${moodValues.length} mood check-ins in this period',
+        values: moodScores,
+        maximum: 5,
+        color: AppColors.coral,
+      ),
+      if (moodValues.isNotEmpty) ...[
+        const SizedBox(height: 10),
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            color: Theme.of(context).cardTheme.color,
+            borderRadius: BorderRadius.circular(17),
+          ),
+          child: Wrap(
+            spacing: 7,
+            runSpacing: 7,
+            children: [
+              for (final entry in _moodCounts(moodRecords).entries)
+                Chip(
+                  visualDensity: VisualDensity.compact,
+                  label: Text('${entry.key} · ${entry.value}',
+                      style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w700)),
+                ),
+            ],
+          ),
+        ),
+      ],
+    ]);
+  }
+
+  int? _moodScore(String mood) => switch (mood.toLowerCase()) {
+        'amazing' => 5,
+        'good' => 4,
+        'okay' => 3,
+        'low' => 2,
+        'stressed' => 1,
+        _ => null,
+      };
+
+  Map<String, int> _moodCounts(List<AppRecord> records) {
+    final result = <String, int>{};
+    for (final record in records) {
+      final mood = record.meta['mood'] as String? ?? record.title;
+      if (_moodScore(mood) != null) result[mood] = (result[mood] ?? 0) + 1;
+    }
+    return result;
+  }
+}
+
+class _TrendCard extends StatelessWidget {
+  const _TrendCard({
+    required this.title,
+    required this.value,
+    required this.subtitle,
+    required this.values,
+    required this.maximum,
+    required this.color,
+  });
+
+  final String title;
+  final String value;
+  final String subtitle;
+  final List<double> values;
+  final double maximum;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) => Container(
+        padding: const EdgeInsets.fromLTRB(15, 13, 15, 12),
+        decoration: BoxDecoration(
+          color: Theme.of(context).cardTheme.color,
+          borderRadius: BorderRadius.circular(18),
+        ),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Row(children: [
+            Expanded(child: Text(title, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w800))),
+            Text(value, style: TextStyle(color: color, fontSize: 18, fontWeight: FontWeight.w900)),
+          ]),
+          const SizedBox(height: 2),
+          Text(subtitle, style: const TextStyle(color: AppColors.muted, fontSize: 9)),
+          const SizedBox(height: 10),
+          SizedBox(
+            height: 54,
+            width: double.infinity,
+            child: CustomPaint(painter: _WellnessBarPainter(values: values, maximum: maximum, color: color)),
+          ),
+          const SizedBox(height: 5),
+          const Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text('6d ago', style: TextStyle(fontSize: 8, color: AppColors.muted)),
+              Text('5d', style: TextStyle(fontSize: 8, color: AppColors.muted)),
+              Text('4d', style: TextStyle(fontSize: 8, color: AppColors.muted)),
+              Text('3d', style: TextStyle(fontSize: 8, color: AppColors.muted)),
+              Text('2d', style: TextStyle(fontSize: 8, color: AppColors.muted)),
+              Text('Yesterday', style: TextStyle(fontSize: 8, color: AppColors.muted)),
+              Text('Today', style: TextStyle(fontSize: 8, color: AppColors.muted)),
+            ],
+          ),
+        ]),
+      );
+}
+
+class _WellnessBarPainter extends CustomPainter {
+  _WellnessBarPainter({required this.values, required this.maximum, required this.color});
+
+  final List<double> values;
+  final double maximum;
+  final Color color;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    if (values.isEmpty) return;
+    final slot = size.width / values.length;
+    final barWidth = slot * .48;
+    for (var index = 0; index < values.length; index++) {
+      final value = values[index].clamp(0, maximum);
+      final height = value == 0 ? 2.0 : (value / maximum) * (size.height - 4);
+      final rect = RRect.fromRectAndRadius(
+        Rect.fromLTWH(
+          slot * index + (slot - barWidth) / 2,
+          size.height - height,
+          barWidth,
+          height,
+        ),
+        const Radius.circular(4),
+      );
+      canvas.drawRRect(rect, Paint()..color = color.withValues(alpha: value == 0 ? .12 : .85));
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _WellnessBarPainter oldDelegate) =>
+      oldDelegate.values != values || oldDelegate.maximum != maximum || oldDelegate.color != color;
+}
+
