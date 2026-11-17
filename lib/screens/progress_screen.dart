@@ -92,7 +92,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
           child: Column(children: [
             SizedBox(height: 154, child: CustomPaint(size: Size.infinite, painter: _BarChartPainter(values: values, dark: Theme.of(context).brightness == Brightness.dark))),
             const SizedBox(height: 10),
-            Row(mainAxisAlignment: MainAxisAlignment.center, children: [Container(width: 8, height: 8, decoration: const BoxDecoration(color: AppColors.blue, shape: BoxShape.circle)), const SizedBox(width: 6), const Text(context.dp('Tasks completed'), style: TextStyle(fontSize: 10, color: AppColors.muted))]),
+            Row(mainAxisAlignment: MainAxisAlignment.center, children: [Container(width: 8, height: 8, decoration: const BoxDecoration(color: AppColors.blue, shape: BoxShape.circle)), const SizedBox(width: 6), Text(context.dp('Tasks completed'), style: TextStyle(fontSize: 10, color: AppColors.muted))]),
           ]),
         ),
         const SizedBox(height: 21),
