@@ -82,7 +82,7 @@ class _PlannerScreenState extends State<PlannerScreen> {
           OutlinedButton.icon(
             onPressed: () => showRecordEditor(context, controller, type: RecordType.dateNote, initialDate: _selected),
             icon: const Icon(Icons.sticky_note_2_outlined, size: 17),
-            label: Text(context.dp('Add a note to this date'),
+            label: Text(context.dp('Add a note to this date')),
           ),
         ],
       ],
