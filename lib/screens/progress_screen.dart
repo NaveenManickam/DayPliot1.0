@@ -5,6 +5,7 @@ import '../models/app_record.dart';
 import '../providers/app_controller.dart';
 import '../utils/date_helpers.dart';
 import '../widgets/record_editor.dart';
+import '../utils/app_strings.dart';
 
 class ProgressScreen extends StatefulWidget {
   const ProgressScreen({super.key, required this.controller});
@@ -44,7 +45,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
     return ListView(
       padding: const EdgeInsets.fromLTRB(20, 12, 20, 118),
       children: [
-        Text('My Progress', style: Theme.of(context).textTheme.headlineSmall),
+        Text(context.dp('My Progress'), style: Theme.of(context).textTheme.headlineSmall),
         const SizedBox(height: 16),
         Container(
           padding: const EdgeInsets.all(4),
@@ -53,7 +54,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
             onTap: () => setState(() => _period = period),
             child: AnimatedContainer(duration: const Duration(milliseconds: 160), padding: const EdgeInsets.symmetric(vertical: 10),
               decoration: BoxDecoration(color: _period == period ? AppColors.blue : Colors.transparent, borderRadius: BorderRadius.circular(12)),
-              child: Text(period, textAlign: TextAlign.center, style: TextStyle(color: _period == period ? Colors.white : AppColors.muted, fontSize: 11, fontWeight: FontWeight.w700))),
+              child: Text(context.dp(period), textAlign: TextAlign.center, style: TextStyle(color: _period == period ? Colors.white : AppColors.muted, fontSize: 11, fontWeight: FontWeight.w700))),
           ))).toList()),
         ),
         const SizedBox(height: 16),
@@ -62,7 +63,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
           decoration: BoxDecoration(color: AppColors.blue, borderRadius: BorderRadius.circular(23), boxShadow: [BoxShadow(color: AppColors.blue.withValues(alpha: .24), blurRadius: 20, offset: const Offset(0, 8))]),
           child: Row(children: [
             Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              const Text('TASK COMPLETION', style: TextStyle(color: Colors.white70, fontSize: 9, letterSpacing: 1.2, fontWeight: FontWeight.w800)),
+              Text(context.dp('TASK COMPLETION'), style: TextStyle(color: Colors.white70, fontSize: 9, letterSpacing: 1.2, fontWeight: FontWeight.w800)),
               const SizedBox(height: 7),
               Text('${(percent * 100).round()}%', style: const TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.w900)),
               const SizedBox(height: 4),
@@ -83,7 +84,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
           Expanded(child: _StatCard(label: 'Best streak', value: '$bestStreak d', icon: Icons.local_fire_department_rounded, color: AppColors.yellow, pale: AppColors.yellowPale)),
         ]),
         const SizedBox(height: 21),
-        Text('Productivity history', style: Theme.of(context).textTheme.titleLarge),
+        Text(context.dp('Productivity history'), style: Theme.of(context).textTheme.titleLarge),
         const SizedBox(height: 12),
         Container(
           padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
@@ -91,11 +92,11 @@ class _ProgressScreenState extends State<ProgressScreen> {
           child: Column(children: [
             SizedBox(height: 154, child: CustomPaint(size: Size.infinite, painter: _BarChartPainter(values: values, dark: Theme.of(context).brightness == Brightness.dark))),
             const SizedBox(height: 10),
-            Row(mainAxisAlignment: MainAxisAlignment.center, children: [Container(width: 8, height: 8, decoration: const BoxDecoration(color: AppColors.blue, shape: BoxShape.circle)), const SizedBox(width: 6), const Text('Tasks completed', style: TextStyle(fontSize: 10, color: AppColors.muted))]),
+            Row(mainAxisAlignment: MainAxisAlignment.center, children: [Container(width: 8, height: 8, decoration: const BoxDecoration(color: AppColors.blue, shape: BoxShape.circle)), const SizedBox(width: 6), const Text(context.dp('Tasks completed'), style: TextStyle(fontSize: 10, color: AppColors.muted))]),
           ]),
         ),
         const SizedBox(height: 21),
-        Text('Habit consistency', style: Theme.of(context).textTheme.titleLarge),
+        Text(context.dp('Habit consistency'), style: Theme.of(context).textTheme.titleLarge),
         const SizedBox(height: 12),
         Container(
           padding: const EdgeInsets.all(17),
@@ -110,11 +111,11 @@ class _ProgressScreenState extends State<ProgressScreen> {
           ]),
         ),
         const SizedBox(height: 21),
-        Text('Activity heatmap', style: Theme.of(context).textTheme.titleLarge),
+        Text(context.dp('Activity heatmap'), style: Theme.of(context).textTheme.titleLarge),
         const SizedBox(height: 12),
         _Heatmap(controller: widget.controller),
         const SizedBox(height: 21),
-        Text('Personal tracking', style: Theme.of(context).textTheme.titleLarge),
+        Text(context.dp('Personal tracking'), style: Theme.of(context).textTheme.titleLarge),
         const SizedBox(height: 12),
         Row(children: [
           Expanded(child: _StatCard(label: 'Water logged', value: '${(totalWater / 1000).toStringAsFixed(1)} L', icon: Icons.water_drop_rounded, color: AppColors.blue, pale: AppColors.bluePale)),
@@ -122,7 +123,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
           Expanded(child: _StatCard(label: 'Exercise', value: '$exerciseMinutes min', icon: Icons.fitness_center_rounded, color: AppColors.mint, pale: AppColors.mintPale)),
         ]),
         const SizedBox(height: 21),
-        Text('Sleep & mood trends', style: Theme.of(context).textTheme.titleLarge),
+        Text(context.dp('Sleep & mood trends'), style: Theme.of(context).textTheme.titleLarge),
         const SizedBox(height: 12),
         _WellnessTrends(
           sleepRecords: sleepRecords,
@@ -130,7 +131,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
           today: now,
         ),
         const SizedBox(height: 18),
-        Text('Sleep & mood history', style: Theme.of(context).textTheme.titleLarge),
+        Text(context.dp('Sleep & mood history'), style: Theme.of(context).textTheme.titleLarge),
         const SizedBox(height: 10),
         _HistoryPanel(
           controller: widget.controller,
@@ -153,7 +154,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
           empty: 'No journal entries yet.',
         ),
         const SizedBox(height: 10),
-        Text('Statistics are calculated from entries saved on this device. Empty periods remain zero.', style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppColors.muted, fontSize: 10)),
+        Text(context.dp('Statistics are calculated from entries saved on this device. Empty periods remain zero.'), style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppColors.muted, fontSize: 10)),
       ],
     );
   }
@@ -224,11 +225,11 @@ class _HistoryPanel extends StatelessWidget {
         borderRadius: BorderRadius.circular(18),
       ),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Text(title, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w800)),
+        Text(context.dp(title), style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w800)),
         if (recent.isEmpty)
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 12),
-            child: Text(empty, style: const TextStyle(color: AppColors.muted, fontSize: 11)),
+            child: Text(context.dp(empty), style: const TextStyle(color: AppColors.muted, fontSize: 11)),
           )
         else
           ...recent.map((record) => ListTile(
@@ -244,7 +245,7 @@ class _HistoryPanel extends StatelessWidget {
                   size: 19,
                 ),
                 title: Text(
-                  _recordTitle(record),
+                  context.dp(_recordTitle(record)),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700),
@@ -523,7 +524,7 @@ class _TrendCard extends StatelessWidget {
             Text(value, style: TextStyle(color: color, fontSize: 18, fontWeight: FontWeight.w900)),
           ]),
           const SizedBox(height: 2),
-          Text(subtitle, style: const TextStyle(color: AppColors.muted, fontSize: 9)),
+          Text(context.dp(subtitle), style: const TextStyle(color: AppColors.muted, fontSize: 9)),
           const SizedBox(height: 10),
           SizedBox(
             height: 54,
