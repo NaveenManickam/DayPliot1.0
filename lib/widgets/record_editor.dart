@@ -4,6 +4,7 @@ import '../core/app_constants.dart';
 import '../models/app_record.dart';
 import '../providers/app_controller.dart';
 import '../utils/date_helpers.dart';
+import '../utils/app_strings.dart';
 
 Future<void> showRecordEditor(
   BuildContext context,
@@ -66,13 +67,14 @@ class _RecordEditorSheetState extends State<RecordEditorSheet> {
   bool _saving = false;
 
   bool get _isEditing => widget.record != null;
+  String _tr(String value) => AppStrings.translate(value, widget.controller.language);
   String get _type => widget.type;
 
   @override
   void initState() {
     super.initState();
     final record = widget.record;
-    _title = TextEditingController(text: record?.title ?? _defaultTitle(_type));
+    _title = TextEditingController(text: record?.title ?? _tr(_defaultTitle(_type)));
     _body = TextEditingController(text: record?.body ?? '');
     _date = record?.date ?? dateOnly(widget.initialDate ?? DateTime.now());
     _startAt = record?.startAt;
@@ -111,7 +113,7 @@ class _RecordEditorSheetState extends State<RecordEditorSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final title = _isEditing ? 'Edit ${_label(_type)}' : 'New ${_label(_type)}';
+    final title = '${_tr(_isEditing ? 'Edit' : 'New')} ${_tr(_label(_type))}';
     return SafeArea(
       child: Padding(
         padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(context).bottom),
@@ -136,12 +138,12 @@ class _RecordEditorSheetState extends State<RecordEditorSheet> {
                         TextFormField(
                           controller: _title,
                           textCapitalization: TextCapitalization.sentences,
-                          decoration: InputDecoration(labelText: _type == RecordType.habit ? 'Habit name' : 'Title', hintText: 'Give it a clear name'),
-                          validator: (value) => value == null || value.trim().isEmpty ? 'Please enter a title' : null,
+                          decoration: InputDecoration(labelText: _tr(_type == RecordType.habit ? 'Habit name' : 'Title'), hintText: _tr('Give it a clear name')),
+                          validator: (value) => value == null || value.trim().isEmpty ? _tr('Please enter a title') : null,
                         ),
                       if (_type != RecordType.water && _type != RecordType.mood) const SizedBox(height: 14),
                       if (_type == RecordType.mood) ...[
-                        const Text('How are you feeling today?', style: TextStyle(fontWeight: FontWeight.w700)),
+                        Text(_tr('How are you feeling today?'), style: TextStyle(fontWeight: FontWeight.w700)),
                         const SizedBox(height: 12),
                         Wrap(spacing: 8, runSpacing: 8, children: [
                           for (final mood in ['Amazing', 'Good', 'Okay', 'Low', 'Stressed'])
@@ -198,7 +200,7 @@ class _RecordEditorSheetState extends State<RecordEditorSheet> {
                           onChanged: (value) => setState(() => _habitIcon = value ?? 'fire'),
                         ),
                         const SizedBox(height: 12),
-                        const Text('Habit colour', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 12)),
+                        Text(_tr('Habit colour'), style: TextStyle(fontWeight: FontWeight.w700, fontSize: 12)),
                         const SizedBox(height: 8),
                         Wrap(spacing: 12, children: [
                           for (final value in [0xFFF2C45E, 0xFF5968F2, 0xFFE85E7A, 0xFF37B99A, 0xFF9B8AE8, 0xFFEF9561])
@@ -219,7 +221,7 @@ class _RecordEditorSheetState extends State<RecordEditorSheet> {
                         ]),
                         if (_frequency != 'Daily') ...[
                           const SizedBox(height: 12),
-                          const Text('Active days', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 12)),
+                          Text(_tr('Active days'), style: TextStyle(fontWeight: FontWeight.w700, fontSize: 12)),
                           const SizedBox(height: 8),
                           Wrap(spacing: 6, children: List.generate(7, (index) {
                             final day = index + 1;
@@ -275,7 +277,7 @@ class _RecordEditorSheetState extends State<RecordEditorSheet> {
                           textCapitalization: TextCapitalization.sentences,
                           minLines: 4,
                           maxLines: 8,
-                          decoration: InputDecoration(labelText: _type == RecordType.journal ? 'Journal entry' : 'Description / notes', alignLabelWithHint: true),
+                          decoration: InputDecoration(labelText: _tr(_type == RecordType.journal ? 'Journal entry' : 'Description / notes'), alignLabelWithHint: true),
                         ),
                       ],
                       if (_type == RecordType.task || _type == RecordType.habit || _type == RecordType.event) ...[
@@ -309,14 +311,14 @@ class _RecordEditorSheetState extends State<RecordEditorSheet> {
                       ],
                       if (_type == RecordType.habit) ...[
                         const SizedBox(height: 8),
-                        const Text('Habits stay in your library when paused. Resume them whenever you are ready.',
+                        Text(_tr('Habits stay in your library when paused. Resume them whenever you are ready.'),
                             style: TextStyle(color: AppColors.muted, fontSize: 11, height: 1.4)),
                       ],
                       const SizedBox(height: 20),
                       FilledButton(
                         onPressed: _saving ? null : _save,
                         style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(52), backgroundColor: AppColors.blue, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16))),
-                        child: _saving ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white)) : Text(_isEditing ? 'Save changes' : 'Save ${_label(_type)}'),
+                        child: _saving ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white)) : Text(_tr(_isEditing ? 'Save changes' : 'Save ${_label(_type)}')),
                       ),
                     ],
                   ),
@@ -335,7 +337,7 @@ class _RecordEditorSheetState extends State<RecordEditorSheet> {
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         decoration: BoxDecoration(color: Theme.of(context).inputDecorationTheme.fillColor, borderRadius: BorderRadius.circular(16)),
         child: Row(children: [
-          Expanded(child: Text(label, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600))),
+          Expanded(child: Text(_tr(label), style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600))),
           IconButton(onPressed: value - (min == 1 ? 1 : min == 5 ? 5 : min == 50 ? 50 : 250) >= min ? () => onChanged(value - (min == 1 ? 1 : min == 5 ? 5 : min == 50 ? 50 : 250)) : null, icon: const Icon(Icons.remove_circle_outline)),
           Text('$value', style: const TextStyle(fontWeight: FontWeight.w800)),
           IconButton(onPressed: value + (min == 1 ? 1 : min == 5 ? 5 : min == 50 ? 50 : 250) <= max ? () => onChanged(value + (min == 1 ? 1 : min == 5 ? 5 : min == 50 ? 50 : 250)) : null, icon: const Icon(Icons.add_circle_outline)),
@@ -350,7 +352,7 @@ class _RecordEditorSheetState extends State<RecordEditorSheet> {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
             decoration: BoxDecoration(color: Theme.of(context).inputDecorationTheme.fillColor, borderRadius: BorderRadius.circular(15)),
-            child: Row(children: [const Icon(Icons.calendar_today_rounded, size: 17, color: AppColors.blue), const SizedBox(width: 11), Expanded(child: Text(label, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600))), Text(shortDate(date), style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700))]),
+            child: Row(children: [const Icon(Icons.calendar_today_rounded, size: 17, color: AppColors.blue), const SizedBox(width: 11), Expanded(child: Text(_tr(label), style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600))), Text(shortDate(date), style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700))]),
           ),
         ),
       );
@@ -366,7 +368,7 @@ class _RecordEditorSheetState extends State<RecordEditorSheet> {
             child: Row(children: [
               const Icon(Icons.notifications_active_outlined, size: 17, color: AppColors.blue),
               const SizedBox(width: 11),
-              Expanded(child: Text(label, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600))),
+              Expanded(child: Text(_tr(label), style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600))),
               Text('${shortDate(time)} · ${timeLabel(time)}', style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700)),
             ]),
           ),
@@ -381,7 +383,7 @@ class _RecordEditorSheetState extends State<RecordEditorSheet> {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
             decoration: BoxDecoration(color: Theme.of(context).inputDecorationTheme.fillColor, borderRadius: BorderRadius.circular(15)),
-            child: Row(children: [const Icon(Icons.schedule_rounded, size: 17, color: AppColors.blue), const SizedBox(width: 11), Expanded(child: Text(label, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600))), Text(time == null ? 'Set time' : timeLabel(time), style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700))]),
+            child: Row(children: [const Icon(Icons.schedule_rounded, size: 17, color: AppColors.blue), const SizedBox(width: 11), Expanded(child: Text(_tr(label), style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600))), Text(time == null ? _tr('Set time') : timeLabel(time), style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700))]),
           ),
         ),
       );
@@ -501,7 +503,7 @@ class _RecordEditorSheetState extends State<RecordEditorSheet> {
       };
 
   String _moodLabel(String value) => switch (value) {
-        'Amazing' => '😄 Amazing', 'Good' => '🙂 Good', 'Okay' => '😐 Okay',
-        'Low' => '😔 Low', 'Stressed' => '😣 Stressed', _ => value,
+        'Amazing' => '😄 ${_tr('Amazing')}', 'Good' => '🙂 ${_tr('Good')}', 'Okay' => '😐 ${_tr('Okay')}',
+        'Low' => '😔 ${_tr('Low')}', 'Stressed' => '😣 ${_tr('Stressed')}', _ => _tr(value),
       };
 }
