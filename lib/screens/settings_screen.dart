@@ -80,7 +80,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               value: controller.biometricEnabled,
               onChanged: (value) => _toggleBiometric(value),
             ),
-            if (controller.hasPin) ListTile(leading: const _IconBox(icon: Icons.lock_open_rounded, color: AppColors.coral, pale: AppColors.coralPale), title: const Text('Remove app PIN', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13)), onTap: _removePin),
+            if (controller.hasPin) ListTile(leading: const _IconBox(icon: Icons.lock_open_rounded, color: AppColors.coral, pale: AppColors.coralPale), title: Text(context.dp('Remove app PIN'), style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13)), onTap: _removePin),
           ]),
           _GroupTitle(context.dp('Data & backup')),
           _SettingsCard(children: [
