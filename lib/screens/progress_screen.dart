@@ -67,7 +67,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
               const SizedBox(height: 7),
               Text('${(percent * 100).round()}%', style: const TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.w900)),
               const SizedBox(height: 4),
-              Text(context.dp('completed out of tasks').replace('{completed}', '$completed').replace('{total}', '${tasks.length}'), style: const TextStyle(color: Colors.white70, fontSize: 11)),
+              Text(widget.controller.language == 'Tamil' ? '$completed / ${tasks.length} பணிகள் முடிந்தன' : '$completed completed out of ${tasks.length} tasks', style: const TextStyle(color: Colors.white70, fontSize: 11)),
             ])),
             SizedBox(width: 78, height: 78, child: Stack(alignment: Alignment.center, children: [
               SizedBox.expand(child: CircularProgressIndicator(value: percent.toDouble(), strokeWidth: 7, backgroundColor: Colors.white24, color: Colors.white)),
