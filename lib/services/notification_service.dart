@@ -39,6 +39,7 @@ class NotificationService {
     required String title,
     required String body,
     required DateTime at,
+    DateTimeComponents? matchDateTimeComponents,
   }) async {
     if (at.isBefore(DateTime.now())) return;
     const details = NotificationDetails(
@@ -60,6 +61,7 @@ class NotificationService {
         scheduledDate: scheduledDate,
         notificationDetails: details,
         androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+        matchDateTimeComponents: matchDateTimeComponents,
       );
     } catch (error) {
       debugPrint('Exact reminder scheduling failed; using inexact mode: $error');
@@ -70,6 +72,7 @@ class NotificationService {
         scheduledDate: scheduledDate,
         notificationDetails: details,
         androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+        matchDateTimeComponents: matchDateTimeComponents,
       );
     }
   }
