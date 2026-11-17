@@ -6,7 +6,6 @@ import '../models/app_record.dart';
 import '../providers/app_controller.dart';
 import '../utils/app_strings.dart';
 import '../widgets/record_editor.dart';
-import '../utils/app_strings.dart';
 
 class NotesScreen extends StatefulWidget {
   const NotesScreen({super.key, required this.controller});
