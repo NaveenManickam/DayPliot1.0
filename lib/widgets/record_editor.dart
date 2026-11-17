@@ -165,7 +165,7 @@ class _RecordEditorSheetState extends State<RecordEditorSheet> {
                         DropdownButtonFormField<String>(
                           value: _priority,
                           decoration: const InputDecoration(labelText: 'Priority'),
-                          items: ['High', 'Medium', 'Low'].map((v) => DropdownMenuItem(value: v, child: Text(v))).toList(),
+                          items: ['High', 'Medium', 'Low'].map((v) => DropdownMenuItem(value: v, child: Text(_tr(v)))).toList(),
                           onChanged: (v) => setState(() => _priority = v ?? 'Medium'),
                         ),
                         const SizedBox(height: 14),
@@ -176,7 +176,7 @@ class _RecordEditorSheetState extends State<RecordEditorSheet> {
                         DropdownButtonFormField<String>(
                           value: _frequency,
                           decoration: const InputDecoration(labelText: 'Frequency'),
-                          items: ['Daily', 'Weekly', 'Custom'].map((v) => DropdownMenuItem(value: v, child: Text(v))).toList(),
+                          items: ['Daily', 'Weekly', 'Custom'].map((v) => DropdownMenuItem(value: v, child: Text(_tr(v)))).toList(),
                           onChanged: (v) => setState(() {
                             _frequency = v ?? 'Daily';
                             if (_frequency == 'Weekly' && _weekdays.length == 7) {
@@ -191,11 +191,11 @@ class _RecordEditorSheetState extends State<RecordEditorSheet> {
                           value: _habitIcon,
                           decoration: const InputDecoration(labelText: 'Habit icon'),
                           items: const [
-                            DropdownMenuItem(value: 'fire', child: Text('🔥 Focus / routine')),
-                            DropdownMenuItem(value: 'water', child: Text('💧 Water')),
-                            DropdownMenuItem(value: 'run', child: Text('🏃 Exercise')),
-                            DropdownMenuItem(value: 'book', child: Text('📖 Reading')),
-                            DropdownMenuItem(value: 'meditate', child: Text('🧘 Mindfulness')),
+                            DropdownMenuItem(value: 'fire', child: Text('🔥 ${_tr('Focus / routine')}')),
+                            DropdownMenuItem(value: 'water', child: Text('💧 ${_tr('Water')}')),
+                            DropdownMenuItem(value: 'run', child: Text('🏃 ${_tr('Exercise')}')),
+                            DropdownMenuItem(value: 'book', child: Text('📖 ${_tr('Reading')}')),
+                            DropdownMenuItem(value: 'meditate', child: Text('🧘 ${_tr('Mindfulness')}')),
                           ],
                           onChanged: (value) => setState(() => _habitIcon = value ?? 'fire'),
                         ),
@@ -244,7 +244,7 @@ class _RecordEditorSheetState extends State<RecordEditorSheet> {
                         DropdownButtonFormField<String>(
                           value: _category,
                           decoration: const InputDecoration(labelText: 'Category'),
-                          items: ['Personal', 'Work', 'Health', 'Family', 'Other'].map((v) => DropdownMenuItem(value: v, child: Text(v))).toList(),
+                          items: ['Personal', 'Work', 'Health', 'Family', 'Other'].map((v) => DropdownMenuItem(value: v, child: Text(_tr(v)))).toList(),
                           onChanged: (v) => setState(() => _category = v ?? 'Personal'),
                         ),
                         const SizedBox(height: 14),
@@ -255,10 +255,10 @@ class _RecordEditorSheetState extends State<RecordEditorSheet> {
                           value: _recurrence,
                           decoration: const InputDecoration(labelText: 'Repeat'),
                           items: const [
-                            DropdownMenuItem(value: 'none', child: Text('Does not repeat')),
-                            DropdownMenuItem(value: 'daily', child: Text('Daily')),
-                            DropdownMenuItem(value: 'weekly', child: Text('Weekly')),
-                            DropdownMenuItem(value: 'monthly', child: Text('Monthly')),
+                            DropdownMenuItem(value: 'none', child: Text(_tr('Does not repeat'))),
+                            DropdownMenuItem(value: 'daily', child: Text(_tr('Daily'))),
+                            DropdownMenuItem(value: 'weekly', child: Text(_tr('Weekly'))),
+                            DropdownMenuItem(value: 'monthly', child: Text(_tr('Monthly'))),
                           ],
                           onChanged: (v) => setState(() => _recurrence = v ?? 'none'),
                         ),
