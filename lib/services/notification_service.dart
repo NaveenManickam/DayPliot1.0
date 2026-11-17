@@ -6,6 +6,8 @@ import 'package:timezone/timezone.dart' as tz;
 
 class NotificationService {
   final FlutterLocalNotificationsPlugin _plugin = FlutterLocalNotificationsPlugin();
+  bool _permissionChecked = false;
+  bool _notificationsGranted = false;
 
   Future<void> initialize() async {
     tzdata.initializeTimeZones();
@@ -26,12 +28,19 @@ class NotificationService {
     await _plugin.initialize(settings: settings);
   }
 
-  Future<bool> requestPermissions() async {
+  Future<bool> requestPermissions({bool force = false}) async {
+    if (_permissionChecked && !force) return _notificationsGranted;
     final android = _plugin.resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
-    if (android == null) return true;
+    if (android == null) {
+      _permissionChecked = true;
+      _notificationsGranted = true;
+      return true;
+    }
     final granted = await android.requestNotificationsPermission();
     await android.requestExactAlarmsPermission();
-    return granted ?? true;
+    _permissionChecked = true;
+    _notificationsGranted = granted ?? true;
+    return _notificationsGranted;
   }
 
   Future<void> schedule({

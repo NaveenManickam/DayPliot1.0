@@ -23,7 +23,7 @@ DayPilot is a Flutter/Dart Android planner with a soft-white rounded-card interf
 
 ## Reminders
 
-Task and event reminders are one-time scheduled reminders. Habit reminders repeat daily or on the selected weekdays. The app rebuilds scheduled reminders from saved local records on launch. Android notification and exact-alarm permissions, plus device battery restrictions, can affect delivery.
+Task and event reminders are one-time scheduled reminders. Habit reminders repeat daily or on the selected weekdays. Android notification permission is requested when the first reminder is saved; permission can also be requested again from Settings. The app rebuilds scheduled reminders from saved local records on launch. Android exact-alarm permission and device battery restrictions can still affect delivery.
 
 ## Security and backups
 

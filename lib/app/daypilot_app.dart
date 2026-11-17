@@ -262,11 +262,11 @@ class _PinGateState extends State<PinGate> {
         if (ok) {
           widget.onUnlocked();
         } else {
-          setState(() => _error = 'Biometric check was cancelled or not recognised.');
+          setState(() => _error = AppStrings.translate('Biometric check was cancelled or not recognised.', widget.controller.language));
         }
       }
     } catch (error) {
-      if (mounted) setState(() => _error = 'Biometric authentication failed.');
+      if (mounted) setState(() => _error = AppStrings.translate('Biometric authentication failed.', widget.controller.language));
     } finally {
       if (mounted) setState(() => _busy = false);
     }

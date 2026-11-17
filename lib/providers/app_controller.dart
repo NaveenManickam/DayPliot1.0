@@ -229,6 +229,7 @@ class AppController extends ChangeNotifier {
     if (reminder is! String) return;
     final reminderTime = DateTime.tryParse(reminder);
     if (reminderTime == null) return;
+    await _notifications.requestPermissions();
     final body = record.body.isEmpty ? 'Reminder from DayPilot' : record.body;
 
     if (record.type == RecordType.habit) {
@@ -494,7 +495,7 @@ class AppController extends ChangeNotifier {
       .map((r) => _key(r.date))
       .toSet();
 
-  Future<bool> requestNotificationPermissions() => _notifications.requestPermissions();
+  Future<bool> requestNotificationPermissions() => _notifications.requestPermissions(force: true);
 
   Future<void> setName(String value) async {
     _name = value.trim();
