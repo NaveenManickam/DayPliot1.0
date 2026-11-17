@@ -11,7 +11,7 @@ class NotificationService {
     tzdata.initializeTimeZones();
     try {
       final currentTimeZone = await FlutterTimezone.getLocalTimezone();
-      tz.setLocalLocation(tz.getLocation(currentTimeZone.name));
+      tz.setLocalLocation(tz.getLocation(currentTimeZone.identifier));
     } catch (error) {
       debugPrint('Could not read device timezone; using timezone database default: $error');
     }
@@ -51,22 +51,23 @@ class NotificationService {
       ),
       iOS: DarwinNotificationDetails(),
     );
+    final scheduledDate = tz.TZDateTime.from(at, tz.local);
     try {
       await _plugin.zonedSchedule(
-        id,
+        id: id,
         title: title,
         body: body,
-        scheduledDate: tz.TZDateTime.from(at, tz.local),
+        scheduledDate: scheduledDate,
         notificationDetails: details,
         androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
       );
     } catch (error) {
       debugPrint('Exact reminder scheduling failed; using inexact mode: $error');
       await _plugin.zonedSchedule(
-        id,
+        id: id,
         title: title,
         body: body,
-        scheduledDate: tz.TZDateTime.from(at, tz.local),
+        scheduledDate: scheduledDate,
         notificationDetails: details,
         androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
       );
