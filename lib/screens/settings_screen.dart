@@ -39,7 +39,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           _SettingsCard(children: [
             Padding(padding: const EdgeInsets.fromLTRB(15, 15, 15, 8), child: Text(context.dp('Theme'), style: Theme.of(context).textTheme.titleMedium)),
             Padding(padding: const EdgeInsets.fromLTRB(12, 0, 12, 14), child: SegmentedButton<String>(
-              segments: const [
+              segments: [
                 ButtonSegment(value: 'light', icon: Icon(Icons.light_mode_rounded, size: 16), label: Text(context.dp('Light'))),
                 ButtonSegment(value: 'dark', icon: Icon(Icons.dark_mode_rounded, size: 16), label: Text(context.dp('Dark'))),
                 ButtonSegment(value: 'system', icon: Icon(Icons.settings_suggest_rounded, size: 16), label: Text(context.dp('System'))),
