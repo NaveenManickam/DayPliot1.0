@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:math';
 
 import 'package:crypto/crypto.dart';
+import 'package:cryptography/cryptography.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -27,6 +28,7 @@ class AppController extends ChangeNotifier {
   bool _biometricEnabled = false;
   String _pinSalt = '';
   String _pinHash = '';
+  int _pinIterations = 0;
 
   bool get isReady => _ready;
   List<AppRecord> get records => List.unmodifiable(_records);
@@ -89,6 +91,7 @@ class AppController extends ChangeNotifier {
     _biometricEnabled = _prefs?.getBool('biometric_enabled') ?? false;
     _pinSalt = _prefs?.getString('pin_salt') ?? '';
     _pinHash = _prefs?.getString('pin_hash') ?? '';
+    _pinIterations = _prefs?.getInt('pin_iterations') ?? 0;
     await _notifications.initialize();
     _records = await _database.getAll();
     // Rebuild reminders from the local database after every app launch.
@@ -506,26 +509,125 @@ class AppController extends ChangeNotifier {
   }
 
   Future<void> setPin(String pin) async {
+    const iterations = 120000;
     final salt = List<int>.generate(16, (_) => Random.secure().nextInt(256));
+    final key = await Pbkdf2(
+      macAlgorithm: Hmac.sha256(),
+      iterations: iterations,
+      bits: 256,
+    ).deriveKey(secretKey: SecretKey(utf8.encode(pin)), nonce: salt);
     _pinSalt = base64Encode(salt);
-    _pinHash = sha256.convert(utf8.encode('$_pinSalt:$pin')).toString();
+    _pinHash = base64Encode(await key.extractBytes());
+    _pinIterations = iterations;
     await _prefs?.setString('pin_salt', _pinSalt);
     await _prefs?.setString('pin_hash', _pinHash);
+    await _prefs?.setInt('pin_iterations', _pinIterations);
     notifyListeners();
   }
 
   Future<bool> verifyPin(String pin) async {
     if (_pinHash.isEmpty) return true;
-    final candidate = sha256.convert(utf8.encode('$_pinSalt:$pin')).toString();
-    return candidate == _pinHash;
+    if (_pinIterations <= 0) {
+      // Upgrade PINs created by earlier DayPilot builds after a successful check.
+      final legacy = sha256.convert(utf8.encode('$_pinSalt:$pin')).toString();
+      if (legacy != _pinHash) return false;
+      await setPin(pin);
+      return true;
+    }
+    try {
+      final key = await Pbkdf2(
+        macAlgorithm: Hmac.sha256(),
+        iterations: _pinIterations,
+        bits: 256,
+      ).deriveKey(
+        secretKey: SecretKey(utf8.encode(pin)),
+        nonce: base64Decode(_pinSalt),
+      );
+      final candidate = await key.extractBytes();
+      final stored = base64Decode(_pinHash);
+      if (candidate.length != stored.length) return false;
+      var difference = 0;
+      for (var i = 0; i < candidate.length; i++) {
+        difference |= candidate[i] ^ stored[i];
+      }
+      return difference == 0;
+    } catch (_) {
+      return false;
+    }
   }
 
   Future<void> removePin() async {
     _pinHash = '';
     _pinSalt = '';
+    _pinIterations = 0;
     await _prefs?.remove('pin_hash');
     await _prefs?.remove('pin_salt');
+    await _prefs?.remove('pin_iterations');
     notifyListeners();
+  }
+
+  Future<String> exportEncryptedBackup(String passphrase) async {
+    const iterations = 150000;
+    final salt = List<int>.generate(16, (_) => Random.secure().nextInt(256));
+    final algorithm = AesGcm.with256bits();
+    final key = await Pbkdf2(
+      macAlgorithm: Hmac.sha256(),
+      iterations: iterations,
+      bits: 256,
+    ).deriveKey(
+      secretKey: SecretKey(utf8.encode(passphrase)),
+      nonce: salt,
+    );
+    final encrypted = await algorithm.encrypt(
+      utf8.encode(exportBackup()),
+      secretKey: key,
+      nonce: algorithm.newNonce(),
+    );
+    return jsonEncode({
+      'app': AppConstants.appName,
+      'format': 'daypilot-encrypted-backup-v1',
+      'kdf': 'PBKDF2-HMAC-SHA256',
+      'iterations': iterations,
+      'cipher': 'AES-256-GCM',
+      'salt': base64Encode(salt),
+      'nonce': base64Encode(encrypted.nonce),
+      'cipherText': base64Encode(encrypted.cipherText),
+      'mac': base64Encode(encrypted.mac.bytes),
+    });
+  }
+
+  Future<void> importEncryptedBackup(String source, String passphrase) async {
+    final envelope = jsonDecode(source) as Map<String, dynamic>;
+    if (envelope['format'] != 'daypilot-encrypted-backup-v1') {
+      await importBackup(source); // Backward compatibility for older plain JSON backups.
+      return;
+    }
+    if (envelope['app'] != AppConstants.appName ||
+        envelope['kdf'] != 'PBKDF2-HMAC-SHA256' ||
+        envelope['cipher'] != 'AES-256-GCM') {
+      throw const FormatException('Unsupported DayPilot backup format.');
+    }
+    final iterations = envelope['iterations'] as int? ?? 0;
+    if (iterations < 100000 || iterations > 300000) {
+      throw const FormatException('Invalid backup encryption settings.');
+    }
+    final salt = base64Decode(envelope['salt'] as String);
+    final nonce = base64Decode(envelope['nonce'] as String);
+    final cipherText = base64Decode(envelope['cipherText'] as String);
+    final mac = base64Decode(envelope['mac'] as String);
+    final key = await Pbkdf2(
+      macAlgorithm: Hmac.sha256(),
+      iterations: iterations,
+      bits: 256,
+    ).deriveKey(
+      secretKey: SecretKey(utf8.encode(passphrase)),
+      nonce: salt,
+    );
+    final clearText = await AesGcm.with256bits().decrypt(
+      SecretBox(cipherText, nonce: nonce, mac: Mac(mac)),
+      secretKey: key,
+    );
+    await importBackup(utf8.decode(clearText));
   }
 
   String exportBackup() => jsonEncode({
