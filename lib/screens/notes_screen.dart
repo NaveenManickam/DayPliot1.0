@@ -6,6 +6,7 @@ import '../models/app_record.dart';
 import '../providers/app_controller.dart';
 import '../utils/app_strings.dart';
 import '../widgets/record_editor.dart';
+import '../utils/app_strings.dart';
 
 class NotesScreen extends StatefulWidget {
   const NotesScreen({super.key, required this.controller});
@@ -53,7 +54,7 @@ class _NotesScreenState extends State<NotesScreen> {
         const SizedBox(height: 17),
         Row(children: [
           Expanded(child: Text('${notes.length} notes', style: const TextStyle(color: AppColors.muted, fontSize: 11, fontWeight: FontWeight.w700))),
-          const Text('Stored on this device', style: TextStyle(color: AppColors.muted, fontSize: 10)),
+          Text(context.dp('Stored on this device'), style: TextStyle(color: AppColors.muted, fontSize: 10)),
         ]),
         const SizedBox(height: 10),
         if (notes.isEmpty)
@@ -63,11 +64,11 @@ class _NotesScreenState extends State<NotesScreen> {
             child: Column(children: [
               Container(width: 62, height: 62, decoration: const BoxDecoration(color: AppColors.bluePale, shape: BoxShape.circle), child: const Icon(Icons.sticky_note_2_rounded, color: AppColors.blue, size: 28)),
               const SizedBox(height: 13),
-              Text(_query.isEmpty ? 'Your notes will appear here.' : 'No notes match your search.', style: const TextStyle(fontWeight: FontWeight.w700)),
+              Text(_query.isEmpty ? context.dp('Your notes will appear here.') : context.dp('No notes match your search.'), style: const TextStyle(fontWeight: FontWeight.w700)),
               const SizedBox(height: 6),
-              const Text('Capture ideas, reminders and things worth remembering.', textAlign: TextAlign.center, style: TextStyle(color: AppColors.muted, fontSize: 11, height: 1.4)),
+              Text(context.dp('Capture ideas, reminders and things worth remembering.'), textAlign: TextAlign.center, style: TextStyle(color: AppColors.muted, fontSize: 11, height: 1.4)),
               const SizedBox(height: 17),
-              OutlinedButton.icon(onPressed: () => showRecordEditor(context, widget.controller, type: RecordType.note), icon: const Icon(Icons.add_rounded, size: 17), label: const Text('Create your first note')),
+              OutlinedButton.icon(onPressed: () => showRecordEditor(context, widget.controller, type: RecordType.note), icon: const Icon(Icons.add_rounded, size: 17), label: Text(context.dp('Create your first note'))),
             ]),
           )
         else
@@ -84,9 +85,9 @@ class _NotesScreenState extends State<NotesScreen> {
     final remove = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Delete note?'),
-        content: const Text('This note will be removed from this device.'),
-        actions: [TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancel')), FilledButton(onPressed: () => Navigator.pop(context, true), child: const Text('Delete'))],
+        title: Text(context.dp('Delete note?')),
+        content: Text(context.dp('This note will be removed from this device.')),
+        actions: [TextButton(onPressed: () => Navigator.pop(context, false), child: Text(context.dp('Cancel'))), FilledButton(onPressed: () => Navigator.pop(context, true), child: Text(context.dp('Delete')))],
       ),
     );
     if (remove == true) await widget.controller.deleteRecord(note);
@@ -114,7 +115,7 @@ class _NoteCard extends StatelessWidget {
               Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                 Text(note.title, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w800, color: AppColors.ink)),
                 const SizedBox(height: 5),
-                Text(note.body.isEmpty ? 'No additional text' : note.body, maxLines: 3, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 11, color: AppColors.muted, height: 1.4)),
+                Text(note.body.isEmpty ? context.dp('No additional text') : note.body, maxLines: 3, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 11, color: AppColors.muted, height: 1.4)),
                 const SizedBox(height: 9),
                 Text('Updated ${DateFormat('d MMM, h:mm a').format(note.updatedAt)}', style: const TextStyle(fontSize: 9, color: AppColors.muted, fontWeight: FontWeight.w600)),
               ])),
