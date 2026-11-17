@@ -67,7 +67,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
               const SizedBox(height: 7),
               Text('${(percent * 100).round()}%', style: const TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.w900)),
               const SizedBox(height: 4),
-              Text('$completed completed out of ${tasks.length} tasks', style: const TextStyle(color: Colors.white70, fontSize: 11)),
+              Text(context.dp('completed out of tasks').replace('{completed}', '$completed').replace('{total}', '${tasks.length}'), style: const TextStyle(color: Colors.white70, fontSize: 11)),
             ])),
             SizedBox(width: 78, height: 78, child: Stack(alignment: Alignment.center, children: [
               SizedBox.expand(child: CircularProgressIndicator(value: percent.toDouble(), strokeWidth: 7, backgroundColor: Colors.white24, color: Colors.white)),
@@ -77,11 +77,11 @@ class _ProgressScreenState extends State<ProgressScreen> {
         ),
         const SizedBox(height: 14),
         Row(children: [
-          Expanded(child: _StatCard(label: 'Completed', value: '$completed', icon: Icons.check_circle_rounded, color: AppColors.mint, pale: AppColors.mintPale)),
+          Expanded(child: _StatCard(label: context.dp('Completed'), value: '$completed', icon: Icons.check_circle_rounded, color: AppColors.mint, pale: AppColors.mintPale)),
           const SizedBox(width: 9),
-          Expanded(child: _StatCard(label: 'Pending', value: '$pending', icon: Icons.pending_actions_rounded, color: AppColors.coral, pale: AppColors.coralPale)),
+          Expanded(child: _StatCard(label: context.dp('Pending'), value: '$pending', icon: Icons.pending_actions_rounded, color: AppColors.coral, pale: AppColors.coralPale)),
           const SizedBox(width: 9),
-          Expanded(child: _StatCard(label: 'Best streak', value: '$bestStreak d', icon: Icons.local_fire_department_rounded, color: AppColors.yellow, pale: AppColors.yellowPale)),
+          Expanded(child: _StatCard(label: context.dp('Best streak'), value: '$bestStreak d', icon: Icons.local_fire_department_rounded, color: AppColors.yellow, pale: AppColors.yellowPale)),
         ]),
         const SizedBox(height: 21),
         Text(context.dp('Productivity history'), style: Theme.of(context).textTheme.titleLarge),
@@ -102,12 +102,12 @@ class _ProgressScreenState extends State<ProgressScreen> {
           padding: const EdgeInsets.all(17),
           decoration: BoxDecoration(color: Theme.of(context).cardTheme.color, borderRadius: BorderRadius.circular(21)),
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Row(children: [Expanded(child: Text('${(habitPercent * 100).round()}% completed', style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 14))), Text('$habitChecks / $expected', style: const TextStyle(color: AppColors.muted, fontSize: 11, fontWeight: FontWeight.w700))]),
+            Row(children: [Expanded(child: Text('${(habitPercent * 100).round()}% ${context.dp('completed')}', style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 14))), Text('$habitChecks / $expected', style: const TextStyle(color: AppColors.muted, fontSize: 11, fontWeight: FontWeight.w700))]),
             const SizedBox(height: 10),
             ClipRRect(borderRadius: BorderRadius.circular(10), child: LinearProgressIndicator(value: habitPercent, minHeight: 8, color: AppColors.mint, backgroundColor: AppColors.mintPale)),
             const SizedBox(height: 13),
-            if (habits.isEmpty) const Text('Add habits to start measuring consistency.', style: TextStyle(color: AppColors.muted, fontSize: 11))
-            else ...habits.map((habit) => Padding(padding: const EdgeInsets.only(top: 7), child: Row(children: [Expanded(child: Text(habit.title, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600))), Text('${widget.controller.habitStreak(habit)} day streak', style: const TextStyle(color: AppColors.muted, fontSize: 10))]))),
+            if (habits.isEmpty) Text(context.dp('Add habits to start measuring consistency.'), style: const TextStyle(color: AppColors.muted, fontSize: 11))
+            else ...habits.map((habit) => Padding(padding: const EdgeInsets.only(top: 7), child: Row(children: [Expanded(child: Text(habit.title, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600))), Text('${widget.controller.habitStreak(habit)} ${context.dp('day streak')}', style: const TextStyle(color: AppColors.muted, fontSize: 10))]))),
           ]),
         ),
         const SizedBox(height: 21),
@@ -118,9 +118,9 @@ class _ProgressScreenState extends State<ProgressScreen> {
         Text(context.dp('Personal tracking'), style: Theme.of(context).textTheme.titleLarge),
         const SizedBox(height: 12),
         Row(children: [
-          Expanded(child: _StatCard(label: 'Water logged', value: '${(totalWater / 1000).toStringAsFixed(1)} L', icon: Icons.water_drop_rounded, color: AppColors.blue, pale: AppColors.bluePale)),
+          Expanded(child: _StatCard(label: context.dp('Water logged'), value: '${(totalWater / 1000).toStringAsFixed(1)} L', icon: Icons.water_drop_rounded, color: AppColors.blue, pale: AppColors.bluePale)),
           const SizedBox(width: 10),
-          Expanded(child: _StatCard(label: 'Exercise', value: '$exerciseMinutes min', icon: Icons.fitness_center_rounded, color: AppColors.mint, pale: AppColors.mintPale)),
+          Expanded(child: _StatCard(label: context.dp('Exercise'), value: '$exerciseMinutes min', icon: Icons.fitness_center_rounded, color: AppColors.mint, pale: AppColors.mintPale)),
         ]),
         const SizedBox(height: 21),
         Text(context.dp('Sleep & mood trends'), style: Theme.of(context).textTheme.titleLarge),
@@ -435,7 +435,7 @@ class _WellnessTrends extends StatelessWidget {
       _TrendCard(
         title: 'Sleep duration',
         value: validSleep.isEmpty ? '—' : '${averageSleep.toStringAsFixed(1)} h',
-        subtitle: '${validSleep.length} sleep logs in this period',
+        subtitle: '${validSleep.length} ${context.dp('sleep logs in this period')}',
         values: sleepHours,
         maximum: 12,
         color: AppColors.blue,
@@ -444,7 +444,7 @@ class _WellnessTrends extends StatelessWidget {
       _TrendCard(
         title: 'Mood score',
         value: moodValues.isEmpty ? '—' : '${averageMood.toStringAsFixed(1)} / 5',
-        subtitle: '${moodValues.length} mood check-ins in this period',
+        subtitle: '${moodValues.length} ${context.dp('mood check-ins in this period')}',
         values: moodScores,
         maximum: 5,
         color: AppColors.coral,
