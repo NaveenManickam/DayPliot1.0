@@ -91,6 +91,11 @@ class AppController extends ChangeNotifier {
     _pinHash = _prefs?.getString('pin_hash') ?? '';
     await _notifications.initialize();
     _records = await _database.getAll();
+    // Rebuild reminders from the local database after every app launch.
+    for (final record in _records) {
+      await _cancelRecordReminders(record.id);
+      await _scheduleRecordReminder(record);
+    }
     _ready = true;
     notifyListeners();
   }
@@ -178,22 +183,91 @@ class AppController extends ChangeNotifier {
     await _database.upsert(record);
     _records.removeWhere((existing) => existing.id == record.id);
     _records.add(record);
-    await _notifications.cancel(_notificationId(record.id));
+    await _cancelRecordReminders(record.id);
     await _scheduleRecordReminder(record);
     notifyListeners();
   }
 
+  Future<void> _cancelRecordReminders(String recordId) async {
+    await _notifications.cancel(_notificationId(recordId));
+    for (var weekday = DateTime.monday; weekday <= DateTime.sunday; weekday++) {
+      await _notifications.cancel(_notificationId('${recordId}:habit:$weekday'));
+    }
+  }
+
   Future<void> _scheduleRecordReminder(AppRecord record) async {
+    if (!_notificationsEnabled || record.done) return;
     final reminder = record.meta['reminderAt'];
-    if (!_notificationsEnabled || record.done || reminder is! String) return;
-    final at = DateTime.tryParse(reminder);
-    if (at == null || !at.isAfter(DateTime.now())) return;
+    if (reminder is! String) return;
+    final reminderTime = DateTime.tryParse(reminder);
+    if (reminderTime == null) return;
+    final body = record.body.isEmpty ? 'Reminder from DayPilot' : record.body;
+
+    if (record.type == RecordType.habit) {
+      if (record.meta['paused'] == true) return;
+      final frequency = record.meta['frequency'] as String? ?? 'Daily';
+      if (frequency == 'Daily') {
+        var next = DateTime(
+          DateTime.now().year,
+          DateTime.now().month,
+          DateTime.now().day,
+          reminderTime.hour,
+          reminderTime.minute,
+        );
+        if (!next.isAfter(DateTime.now())) {
+          next = next.add(const Duration(days: 1));
+        }
+        await _notifications.schedule(
+          id: _notificationId(record.id),
+          title: record.title,
+          body: body,
+          at: next,
+          matchDateTimeComponents: DateTimeComponents.time,
+        );
+      } else {
+        final weekdays = (record.meta['weekdays'] as List? ?? const [])
+            .whereType<num>()
+            .map((value) => value.toInt())
+            .where((day) => day >= 1 && day <= 7)
+            .toSet()
+            .toList()
+          ..sort();
+        for (final weekday in weekdays) {
+          final at = _nextWeekdayTime(DateTime.now(), weekday, reminderTime);
+          await _notifications.schedule(
+            id: _notificationId('${record.id}:habit:$weekday'),
+            title: record.title,
+            body: body,
+            at: at,
+            matchDateTimeComponents: DateTimeComponents.dayOfWeekAndTime,
+          );
+        }
+      }
+      return;
+    }
+
+    if (!reminderTime.isAfter(DateTime.now())) return;
     await _notifications.schedule(
       id: _notificationId(record.id),
       title: record.title,
-      body: record.body.isEmpty ? 'Reminder from DayPilot' : record.body,
-      at: at,
+      body: body,
+      at: reminderTime,
     );
+  }
+
+  DateTime _nextWeekdayTime(DateTime now, int weekday, DateTime reminderTime) {
+    final daysAhead = (weekday - now.weekday + 7) % 7;
+    var candidate = DateTime(
+      now.year,
+      now.month,
+      now.day + daysAhead,
+      reminderTime.hour,
+      reminderTime.minute,
+    );
+    if (!candidate.isAfter(now)) {
+      candidate = candidate.add(const Duration(days: 7));
+    }
+    return candidate;
   }
 
   Future<void> deleteRecord(AppRecord record) async {
@@ -205,7 +279,7 @@ class AppController extends ChangeNotifier {
     }
     for (final id in idsToDelete) {
       await _database.delete(id);
-      await _notifications.cancel(_notificationId(id));
+      await _cancelRecordReminders(id);
     }
     _records.removeWhere((existing) => idsToDelete.contains(existing.id));
     notifyListeners();
