@@ -19,6 +19,7 @@ dependencies:
   flutter_timezone: ^5.1.1
   intl: ^0.20.3
   crypto: ^3.0.8
+  cryptography: ^2.7.0
 
 dev_dependencies:
   flutter_test:
